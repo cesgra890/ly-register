@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LY Balloon Register</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="data.js"></script>
+</head>
+<body>
+  <main class="page">
+    <header class="site-header">
+      <div>
+        <h1><span>LY-</span> Balloon Register</h1>
+        <p>Hot air balloons registered in Lithuania</p>
+      </div>
+      <div class="count" id="count" aria-live="polite"></div>
+    </header>
+
+    <div class="controls">
+      <input id="q" type="search" placeholder="Search registration, branding, model, owner…" aria-label="Search">
+      <select id="status" aria-label="CAA status"><option value="">All statuses</option></select>
+      <select id="maker" aria-label="Manufacturer"><option value="">All manufacturers</option></select>
+      <select id="sort" aria-label="Sort">
+        <option value="reg">Sort: registration</option>
+        <option value="year-desc">Newest built</option>
+        <option value="year-asc">Oldest built</option>
+        <option value="caa-desc">Latest CAA registration</option>
+      </select>
+    </div>
+
+    <ul class="grid" id="list"></ul>
+    <p class="empty" id="empty" hidden>No balloons match.</p>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const controls = ["q", "status", "maker", "sort"];
+    let all = [];
+
+    function fillSelect(select, values) {
+      for (const v of values) select.append(el("option", { value: v }, v));
+    }
+
+    function readUrlState() {
+      const params = new URLSearchParams(location.search);
+      for (const id of controls) if (params.has(id)) $(id).value = params.get(id);
+    }
+
+    function writeUrlState() {
+      const params = new URLSearchParams();
+      for (const id of controls) if ($(id).value && !(id === "sort" && $(id).value === "reg")) params.set(id, $(id).value);
+      const qs = params.toString();
+      history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
+    }
+
+    function card(row) {
+      const status = row["CAA status_"];
+      const model = [row["manufacturer_"], row.model].filter((v) => !isBlank(v)).join(" · ");
+      return el("li", {},
+        el("a", { class: "card", href: `details.html?id=${encodeURIComponent(row.id)}` },
+          balloonImage(row),
+          el("div", { class: "card-body" },
+            el("div", { class: "card-top" },
+              el("span", { class: "reg" }, regMark(row)),
+              el("span", { class: `status ${statusClass(status)}` }, status || "?")),
+            el("div", { class: "branding" }, isBlank(row.branding) ? "—" : row.branding),
+            el("div", { class: "card-top" },
+              el("span", { class: "meta" }, model || "Unknown make"),
+              swatches(row)))));
+    }
+
+    function render() {
+      const q = $("q").value.trim().toLowerCase();
+      const status = $("status").value;
+      const maker = $("maker").value;
+      const sort = $("sort").value;
+      const fields = ["registration mark", "branding", "branding extra", "manufacturer_", "model", "owner", "tags_", "reg. history"];
+
+      let rows = all.filter((r) =>
+        (!status || r["CAA status_"] === status) &&
+        (!maker || r["manufacturer_"] === maker) &&
+        (!q || fields.some((f) => (r[f] || "").toLowerCase().includes(q))));
+
+      const by = {
+        reg: byReg,
+        "year-desc": (a, b) => (b["build year"] || "").localeCompare(a["build year"] || ""),
+        "year-asc": (a, b) => (a["build year"] || "9999").localeCompare(b["build year"] || "9999"),
+        "caa-desc": (a, b) => (b["CAA registration"] || "").localeCompare(a["CAA registration"] || ""),
+      }[sort];
+      rows = rows.slice().sort(by);
+
+      $("list").replaceChildren(...rows.map(card));
+      $("empty").hidden = rows.length > 0;
+      $("count").textContent = rows.length === all.length ? `${all.length} balloons` : `${rows.length} of ${all.length}`;
+      writeUrlState();
+    }
+
+    loadBalloons().then((rows) => {
+      all = rows;
+      const uniq = (key) => [...new Set(rows.map((r) => r[key]).filter((v) => !isBlank(v)))].sort();
+      fillSelect($("status"), uniq("CAA status_"));
+      fillSelect($("maker"), uniq("manufacturer_"));
+      readUrlState();
+      for (const id of controls) $(id).addEventListener("input", render);
+      render();
+    }).catch((err) => {
+      console.error(err);
+      $("list").replaceChildren();
+      $("empty").hidden = false;
+      $("empty").className = "error";
+      $("empty").textContent = "Couldn't load the register. If you opened this file directly, serve the folder with a local web server instead.";
+    });
+  </script>
+</body>
+</html>

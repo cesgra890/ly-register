@@ -1,0 +1,142 @@
+// Shared data loader for the LY balloon register.
+//
+// Paste your Google Sheet's published CSV link here:
+//   File → Share → Publish to web → (choose the sheet) → Comma-separated values (.csv)
+// Leave empty to use the local register.csv copy.
+const SHEET_CSV_URL = "";
+const LOCAL_CSV_URL = "register.csv";
+const CACHE_KEY = "ly-register-v1";
+
+const COLOR_TAGS = {
+  red: "#d63a2f", "red-dark": "#8e1f1a", white: "#ffffff", blue: "#2f6fd6",
+  "blue-dark": "#1b3a7a", yellow: "#f2c230", green: "#3a9a4a", "green-dark": "#1f5a2a",
+  black: "#1a1a1a", orange: "#f08a24", gray: "#8a8f98", silver: "#c4c9d0",
+  pink: "#ee7fb4", gold: "#c9a227", purple: "#7a3fb0", transparent: "transparent",
+};
+
+function parseCsv(text) {
+  const result = Papa.parse(text, { header: true, skipEmptyLines: true });
+  return result.data.filter((row) => row.id);
+}
+
+async function fetchCsv(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+  return parseCsv(await res.text());
+}
+
+async function loadBalloons() {
+  try {
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) return JSON.parse(cached);
+  } catch (_) {}
+
+  let rows;
+  if (SHEET_CSV_URL) {
+    try {
+      rows = await fetchCsv(SHEET_CSV_URL);
+    } catch (err) {
+      console.warn("Live sheet failed, using local copy:", err);
+    }
+  }
+  if (!rows) rows = await fetchCsv(LOCAL_CSV_URL);
+
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(rows));
+  } catch (_) {}
+  return rows;
+}
+
+function splitTags(value) {
+  return (value || "").split(",").map((t) => t.trim()).filter(Boolean);
+}
+
+function colorTags(row) {
+  return splitTags(row["tags_"]).filter((t) => t in COLOR_TAGS);
+}
+
+function labelFor(column) {
+  return column.replace(/_+$/, "");
+}
+
+function isBlank(value) {
+  return value == null || value.trim() === "" || value.trim() === "-";
+}
+
+function regMark(row) {
+  return isBlank(row["registration mark"]) ? "No mark" : row["registration mark"];
+}
+
+// Registration order, with balloons that have no mark at the end.
+function byReg(a, b) {
+  const ab = isBlank(a["registration mark"]), bb = isBlank(b["registration mark"]);
+  if (ab !== bb) return ab ? 1 : -1;
+  return (a["registration mark"] || a.id).localeCompare(b["registration mark"] || b.id);
+}
+
+function statusClass(status) {
+  const s = (status || "").trim().toLowerCase();
+  if (s === "registered") return "status-ok";
+  if (s === "unregistered") return "status-off";
+  return "status-unknown";
+}
+
+// Small DOM helper: el("div", { class: "x" }, child, "text", ...)
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children.flat()) {
+    if (child == null || child === false) continue;
+    node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  }
+  return node;
+}
+
+function swatches(row) {
+  const tags = colorTags(row);
+  if (!tags.length) return null;
+  return el("span", { class: "swatches", title: tags.join(", ") },
+    tags.map((t) => el("span", { class: "swatch", style: `--c:${COLOR_TAGS[t]}` })));
+}
+
+function balloonImage(row, className) {
+  const wrap = el("div", { class: `img-wrap ${className || ""}` });
+  const placeholder = () => {
+    wrap.replaceChildren(el("div", { class: "img-placeholder", "aria-hidden": "true" }, balloonIcon()));
+  };
+  const src = imageSrc(row);
+  if (!src) {
+    placeholder();
+  } else {
+    const img = el("img", { src, alt: `${regMark(row)} balloon`, loading: "lazy" });
+    img.addEventListener("error", placeholder);
+    wrap.append(img);
+  }
+  return wrap;
+}
+
+// Photos live in images/<id>.jpg, made by prepare_images.py. The .img column
+// names the original photo for that script; "n/a" means there is no photo.
+const IMAGE_DIR = "images/";
+
+function imageSrc(row) {
+  if ((row[".img"] || "").trim().toLowerCase() === "n/a") return null;
+  return IMAGE_DIR + encodeURIComponent(`${row.id}.jpg`);
+}
+
+function balloonIcon() {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 24 32");
+  svg.innerHTML =
+    '<path d="M12 1C6 1 2 5.5 2 11c0 5 4 9 7 12h6c3-3 7-7 7-12 0-5.5-4-10-10-10z" fill="none" stroke="currentColor" stroke-width="1.4"/>' +
+    '<path d="M12 1c-3 2.5-4 6-4 10 0 4 1 8 1 12M12 1c3 2.5 4 6 4 10 0 4-1 8-1 12" fill="none" stroke="currentColor" stroke-width="1"/>' +
+    '<path d="M9 23l.5 4M15 23l-.5 4" stroke="currentColor" stroke-width="1"/>' +
+    '<rect x="9" y="27" width="6" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/>';
+  return svg;
+}

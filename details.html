@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Balloon · LY Balloon Register</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="data.js"></script>
+</head>
+<body>
+  <main class="page">
+    <a class="back" id="back" href="index.html">← All balloons</a>
+    <div id="content"></div>
+  </main>
+
+  <script>
+    const content = document.getElementById("content");
+    const id = new URLSearchParams(location.search).get("id");
+
+    // Return to the list with its filters intact when we came from it.
+    if (document.referrer) {
+      const ref = new URL(document.referrer);
+      if (ref.origin === location.origin && /\/(index\.html)?$/.test(ref.pathname)) {
+        document.getElementById("back").href = ref.pathname + ref.search;
+      }
+    }
+
+    function fieldValue(column, value) {
+      if (isBlank(value)) return el("dd", { class: "blank" }, "—");
+      if (column === "reg. history" || column === "tags_") {
+        return el("dd", {}, el("div", { class: "chips" }, splitTags(value).map((t) => el("span", { class: "chip" }, t))));
+      }
+      if (/^https?:\/\//i.test(value.trim())) {
+        return el("dd", {}, el("a", { href: value.trim(), target: "_blank", rel: "noopener noreferrer" }, "Open link ↗"));
+      }
+      return el("dd", {}, value);
+    }
+
+    function render(rows) {
+      const index = rows.findIndex((r) => r.id === id);
+      if (index === -1) {
+        content.replaceChildren(el("p", { class: "empty" }, `No balloon with id “${id || ""}”.`));
+        return;
+      }
+      const row = rows[index];
+      const reg = regMark(row);
+      document.title = `${reg} · LY Balloon Register`;
+
+      const status = row["CAA status_"];
+      const model = [row["manufacturer_"], row.model].filter((v) => !isBlank(v)).join(" ");
+      const subtitle = [row.branding, row["branding extra"]].filter((v) => !isBlank(v)).join(" — ");
+
+      const fields = el("dl", { class: "fields" },
+        Object.keys(row).flatMap((col) => [el("dt", {}, labelFor(col)), fieldValue(col, row[col])]));
+
+      const sorted = rows.slice().sort(byReg);
+      const pos = sorted.indexOf(row);
+      const prev = sorted[pos - 1];
+      const next = sorted[pos + 1];
+      const link = (r, text) => r ? el("a", { href: `details.html?id=${encodeURIComponent(r.id)}` }, text) : el("span");
+      const markOf = (r) => r && (isBlank(r["registration mark"]) ? r.id : r["registration mark"]);
+
+      content.replaceChildren(
+        el("article", { class: "detail" },
+          balloonImage(row),
+          el("div", {},
+            el("header", { class: "detail-head" },
+              el("h1", {}, reg),
+              el("p", { class: "subtitle" }, subtitle || model || "—"),
+              el("div", { class: "row" },
+                el("span", { class: `status ${statusClass(status)}` }, status || "?"),
+                swatches(row),
+                subtitle && model ? el("span", { class: "meta" }, model) : null)),
+            fields)),
+        el("nav", { class: "pager" },
+          link(prev, `← ${markOf(prev)}`),
+          link(next, `${markOf(next)} →`)));
+    }
+
+    loadBalloons().then(render).catch((err) => {
+      console.error(err);
+      content.replaceChildren(el("p", { class: "error" }, "Couldn't load the register."));
+    });
+  </script>
+</body>
+</html>
