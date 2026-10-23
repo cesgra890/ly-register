@@ -10,8 +10,15 @@ then run:
 For every row in the register:
   * .img = "n/a"          -> no photo, skipped
   * .img = "IMG_4521.jpg" -> photos-original/IMG_4521.jpg becomes images/<id>.jpg
-  * .img empty            -> a file in photos-original/ named after the id
-                             (ly-auz.jpg, LY-AUZ.HEIC, ...) becomes images/<id>.jpg
+  * .img = "IMG_4521.jpg, IMG_4530.HEIC, ..."
+                          -> several photos for the details page carousel; the first
+                             is the cover (images/<id>.jpg), then images/<id>-2.jpg, -3, ...
+  * .img empty            -> files in photos-original/ named after the id: ly-auz.jpg
+                             (cover), ly-auz-2.jpg, ly-auz-3.jpg, ... (any case/extension)
+
+Finally images/index.json is written with the number of photos per id, which the
+details page uses to build its carousel. Extra <id>-N.jpg files left over from an
+earlier run with more photos are removed.
 
 Images are shrunk so the longest side is at most --size pixels (never enlarged)
 and saved as JPEG. Uses macOS's built-in `sips`, so HEIC photos work too.
@@ -20,6 +27,8 @@ Already-converted photos are skipped unless the original is newer or --force is 
 
 import argparse
 import csv
+import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -67,6 +76,16 @@ def main():
     with open(args.csv, encoding="utf-8", newline="") as f:
         rows = [r for r in csv.DictReader(f) if (r.get("id") or "").strip()]
 
+    def numbered(balloon_id):
+        """Originals named <id>-2, <id>-3, ... in number order."""
+        pattern = re.compile(rf"{re.escape(balloon_id.lower())}-(\d+)")
+        hits = [(int(m.group(1)), p) for p in originals if (m := pattern.fullmatch(p.stem.lower()))]
+        return [p for _, p in sorted(hits, key=lambda h: h[0])]
+
+    # Which original each output was made from, so reordering photos redoes them.
+    made_from_file = args.out / ".sources.json"
+    made_from = json.loads(made_from_file.read_text()) if made_from_file.exists() else {}
+
     done, skipped, no_photo, missing, failed, used = 0, 0, 0, [], [], set()
     for row in rows:
         balloon_id = row["id"].strip()
@@ -75,32 +94,68 @@ def main():
             no_photo += 1
             continue
 
+        sources = []
         if wanted:
-            name = Path(wanted).name.lower()
-            src = by_name.get(name) or by_stem.get(Path(name).stem)
+            for name in (n.strip() for n in wanted.split(",")):
+                if not name:
+                    continue
+                name = Path(name).name.lower()
+                src = by_name.get(name) or by_stem.get(Path(name).stem)
+                if src:
+                    sources.append(src)
+                else:
+                    missing.append(f"{balloon_id} ({name})")
         else:
-            src = by_stem.get(balloon_id.lower())
-        if not src:
-            missing.append(f"{balloon_id} ({wanted or 'no .img, no file named after id'})")
+            cover = by_stem.get(balloon_id.lower())
+            sources = ([cover] if cover else []) + numbered(balloon_id)
+            if not sources:
+                missing.append(f"{balloon_id} (no .img, no file named after id)")
+        if not sources:
             continue
-        used.add(src)
+        used.update(sources)
 
-        dst = args.out / f"{balloon_id}.jpg"
-        if dst.exists() and not args.force and dst.stat().st_mtime >= src.stat().st_mtime:
-            skipped += 1
+        for n, src in enumerate(sources, start=1):
+            dst = args.out / (f"{balloon_id}.jpg" if n == 1 else f"{balloon_id}-{n}.jpg")
+            up_to_date = dst.exists() and dst.stat().st_mtime >= src.stat().st_mtime
+            if up_to_date and made_from.get(dst.name) == src.name and not args.force:
+                skipped += 1
+                continue
+            try:
+                convert(src, dst, args.size, args.quality)
+                made_from[dst.name] = src.name
+                done += 1
+                print(f"  {src.name} -> {dst.relative_to(HERE) if dst.is_relative_to(HERE) else dst}")
+            except subprocess.CalledProcessError as err:
+                failed.append(f"{balloon_id}: {src.name} ({err.stderr.strip() or err})")
+
+        # Drop carousel photos left over from a run that had more of them.
+        for stale in args.out.glob(f"{balloon_id}-*.jpg"):
+            m = re.fullmatch(rf"{re.escape(balloon_id)}-(\d+)", stale.stem)
+            if m and int(m.group(1)) > len(sources):
+                stale.unlink()
+                made_from.pop(stale.name, None)
+                print(f"  removed {stale.name}")
+
+    # Photo count per id, from what is actually in the output folder.
+    index = {}
+    for row in rows:
+        balloon_id = row["id"].strip()
+        if not (args.out / f"{balloon_id}.jpg").exists():
             continue
-        try:
-            convert(src, dst, args.size, args.quality)
-            done += 1
-            print(f"  {src.name} -> {dst.relative_to(HERE) if dst.is_relative_to(HERE) else dst}")
-        except subprocess.CalledProcessError as err:
-            failed.append(f"{balloon_id}: {src.name} ({err.stderr.strip() or err})")
+        count = 1
+        while (args.out / f"{balloon_id}-{count + 1}.jpg").exists():
+            count += 1
+        index[balloon_id] = count
+    (args.out / "index.json").write_text(json.dumps(index, indent=0, sort_keys=True) + "\n")
+    multi = sum(1 for c in index.values() if c > 1)
+    made_from_file.write_text(json.dumps(made_from, indent=0, sort_keys=True) + "\n")
 
     unused = sorted(p.name for p in originals if p not in used)
 
     print(f"\nConverted {done}, already up to date {skipped}, marked n/a {no_photo}.")
+    print(f"{len(index)} balloons have photos ({multi} with more than one); wrote {args.out.name}/index.json.")
     if missing:
-        print(f"\nNo photo found for {len(missing)} balloons:")
+        print(f"\n{len(missing)} photos not found:")
         print("\n".join(f"  {m}" for m in missing))
     if unused:
         print(f"\n{len(unused)} photos in {args.originals.name}/ aren't linked to any balloon:")

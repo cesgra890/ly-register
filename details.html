@@ -37,7 +37,71 @@
       return el("dd", {}, value);
     }
 
-    function render(rows) {
+    // Swipeable photo strip; with one photo it's a plain image, with none the placeholder.
+    function carousel(srcs, alt) {
+      const wrap = el("div", { class: "img-wrap carousel" });
+      const track = el("div", { class: "carousel-track" });
+      const prev = el("button", { class: "carousel-btn prev", type: "button", "aria-label": "Previous photo" }, "‹");
+      const next = el("button", { class: "carousel-btn next", type: "button", "aria-label": "Next photo" }, "›");
+      const dots = el("div", { class: "carousel-dots" });
+      const counter = el("span", { class: "carousel-count", "aria-live": "polite" });
+      let current = 0;
+
+      const slides = () => [...track.children];
+      const go = (i) => {
+        const n = slides().length;
+        current = Math.max(0, Math.min(n - 1, i));
+        track.scrollTo({ left: current * track.clientWidth, behavior: "smooth" });
+      };
+
+      function update() {
+        const n = slides().length;
+        if (n === 0) {
+          wrap.className = "img-wrap";
+          wrap.replaceChildren(el("div", { class: "img-placeholder", "aria-hidden": "true" }, balloonIcon()));
+          return;
+        }
+        const multi = n > 1;
+        wrap.classList.toggle("multi", multi);
+        wrap.tabIndex = multi ? 0 : -1;
+        counter.textContent = `${current + 1} / ${n}`;
+        prev.disabled = current === 0;
+        next.disabled = current === n - 1;
+        dots.replaceChildren(...slides().map((_, i) =>
+          el("button", { type: "button", class: "dot", "aria-label": `Photo ${i + 1}`, "aria-current": i === current ? "true" : null, onclick: () => go(i) })));
+      }
+
+      srcs.forEach((src, i) => {
+        // Not lazy: a missing photo should drop out before anyone swipes to it.
+        const img = el("img", { src, alt: `${alt}, photo ${i + 1}`, draggable: "false" });
+        const slide = el("div", { class: "slide" }, img);
+        img.addEventListener("error", () => { slide.remove(); current = Math.min(current, slides().length - 1); update(); });
+        track.append(slide);
+      });
+
+      let frame;
+      track.addEventListener("scroll", () => {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          const i = Math.round(track.scrollLeft / track.clientWidth);
+          if (i !== current) { current = i; update(); }
+        });
+      });
+      prev.addEventListener("click", () => go(current - 1));
+      next.addEventListener("click", () => go(current + 1));
+      wrap.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") { e.preventDefault(); go(current - 1); }
+        if (e.key === "ArrowRight") { e.preventDefault(); go(current + 1); }
+      });
+
+      wrap.setAttribute("aria-roledescription", "carousel");
+      wrap.setAttribute("aria-label", `${alt} photos`);
+      wrap.append(track, prev, next, dots, counter);
+      update();
+      return wrap;
+    }
+
+    function render([rows, photoIndex]) {
       const index = rows.findIndex((r) => r.id === id);
       if (index === -1) {
         content.replaceChildren(el("p", { class: "empty" }, `No balloon with id “${id || ""}”.`));
@@ -63,7 +127,7 @@
 
       content.replaceChildren(
         el("article", { class: "detail" },
-          balloonImage(row),
+          carousel(photoSrcs(row, photoIndex), `${reg} balloon`),
           el("div", {},
             el("header", { class: "detail-head" },
               el("h1", {}, reg),
@@ -78,7 +142,7 @@
           link(next, `${markOf(next)} →`)));
     }
 
-    loadBalloons().then(render).catch((err) => {
+    Promise.all([loadBalloons(), loadPhotoIndex()]).then(render).catch((err) => {
       console.error(err);
       content.replaceChildren(el("p", { class: "error" }, "Couldn't load the register."));
     });

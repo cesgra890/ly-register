@@ -90,6 +90,35 @@ a { color: inherit; }
 .img-placeholder { color: var(--muted); opacity: 0.5; width: 40%; max-width: 72px; }
 .img-placeholder svg { width: 100%; height: auto; display: block; }
 
+/* Details page photo carousel */
+.carousel { position: relative; display: block; }
+.carousel:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.carousel-track {
+  display: flex; width: 100%; height: 100%;
+  overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.carousel-track::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 100%; height: 100%; scroll-snap-align: start; }
+.carousel-btn, .carousel-dots, .carousel-count { display: none; }
+.carousel.multi .carousel-btn, .carousel.multi .carousel-dots, .carousel.multi .carousel-count { display: flex; }
+.carousel-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 40px; height: 40px; align-items: center; justify-content: center;
+  border: 0; border-radius: 50%; cursor: pointer;
+  background: rgb(0 0 0 / 0.45); color: #fff; font: 28px/1 var(--sans); padding-bottom: 3px;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+.carousel-btn:hover { background: rgb(0 0 0 / 0.7); }
+.carousel-btn:disabled { opacity: 0; pointer-events: none; }
+.carousel-btn.prev { left: 10px; }
+.carousel-btn.next { right: 10px; }
+.carousel-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); gap: 6px; padding: 5px 8px; border-radius: 99px; background: rgb(0 0 0 / 0.35); }
+.dot { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 50%; background: rgb(255 255 255 / 0.5); cursor: pointer; }
+.dot[aria-current="true"] { background: #fff; }
+.carousel-count { position: absolute; top: 10px; right: 10px; padding: 2px 8px; border-radius: 99px; background: rgb(0 0 0 / 0.45); color: #fff; font: 12px/1.6 var(--mono); }
+@media (hover: none) { .carousel-btn { display: none !important; } }
+
 /* Status + swatches */
 .status { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 99px; white-space: nowrap; border: 1px solid currentColor; }
 .status-ok { color: var(--ok); }

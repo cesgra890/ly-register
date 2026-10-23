@@ -129,6 +129,36 @@ function imageSrc(row) {
   return IMAGE_DIR + encodeURIComponent(`${row.id}.jpg`);
 }
 
+// images/index.json ({ id: photo count }) is written by prepare_images.py.
+async function loadPhotoIndex() {
+  const key = `${CACHE_KEY}-photos`;
+  try {
+    const cached = sessionStorage.getItem(key);
+    if (cached) return JSON.parse(cached);
+  } catch (_) {}
+
+  let index = {};
+  try {
+    const res = await fetch(`${IMAGE_DIR}index.json`, { cache: "no-store" });
+    if (res.ok) index = await res.json();
+  } catch (_) {}
+
+  try {
+    sessionStorage.setItem(key, JSON.stringify(index));
+  } catch (_) {}
+  return index;
+}
+
+// All photos for a balloon: the cover <id>.jpg, then <id>-2.jpg, <id>-3.jpg, ...
+function photoSrcs(row, index) {
+  const cover = imageSrc(row);
+  if (!cover) return [];
+  const count = index[row.id] || 1;
+  const srcs = [cover];
+  for (let n = 2; n <= count; n++) srcs.push(IMAGE_DIR + encodeURIComponent(`${row.id}-${n}.jpg`));
+  return srcs;
+}
+
 function balloonIcon() {
   const ns = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(ns, "svg");
