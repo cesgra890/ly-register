@@ -122,10 +122,10 @@ a { color: inherit; }
 @media (hover: none) { .carousel-btn { display: none !important; } }
 
 /* Status + swatches */
-.status { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 99px; white-space: nowrap; border: 1px solid currentColor; }
-.status-ok { color: var(--ok); }
-.status-off { color: var(--off); }
-.status-unknown { color: var(--warn); }
+.status {
+  font-size: 13px; line-height: 1.4; padding: 2px 8px; border-radius: 6px; white-space: nowrap;
+  background: var(--status-bg); color: var(--status-fg);
+}
 .swatches { display: inline-flex; gap: 3px; }
 .swatch { width: 12px; height: 12px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.2); }
 

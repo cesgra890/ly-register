@@ -102,11 +102,24 @@ function byReg(a, b) {
   return (a["registration mark"] || a.id).localeCompare(b["registration mark"] || b.id);
 }
 
-function statusClass(status) {
-  const s = (status || "").trim().toLowerCase();
-  if (s === "registered") return "status-ok";
-  if (s === "unregistered") return "status-off";
-  return "status-unknown";
+// CAA status pills, keyed by slug: [title, background, text].
+const STATUS_STYLES = {
+  unregistered: ["Unregistered", "#E6E6E6", "#404040"],
+  registered: ["Registered", "#CFF7BE", "#23800B"],
+  "no-reg-history": ["No reg history", "#FFCFC8", "#AE0701"],
+  expected: ["Expected", "#BEE1F6", "#0053AA"],
+  unknown: ["?", "#E6E6E6", "#404040"],
+};
+
+// "no reg history" -> "no-reg-history"; empty, "?" or anything unlisted -> "unknown".
+function statusSlug(status) {
+  const slug = (status || "").trim().toLowerCase().replace(/\s+/g, "-");
+  return slug in STATUS_STYLES ? slug : "unknown";
+}
+
+function statusPill(status) {
+  const [title, bg, fg] = STATUS_STYLES[statusSlug(status)];
+  return el("span", { class: "status", style: `--status-bg:${bg};--status-fg:${fg}` }, title);
 }
 
 // Small DOM helper: el("div", { class: "x" }, child, "text", ...)

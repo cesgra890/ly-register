@@ -28,6 +28,7 @@
 
     function fieldValue(column, value) {
       if (isBlank(value)) return el("dd", { class: "blank" }, "—");
+      if (column === "CAA status_") return el("dd", {}, statusPill(value));
       if (column === "tags_") {
         return el("dd", {}, el("div", { class: "chips" }, splitTags(value).map(tagPill)));
       }
@@ -143,7 +144,7 @@
               el("h1", {}, reg),
               el("p", { class: "subtitle" }, subtitle || model || "—"),
               el("div", { class: "row" },
-                el("span", { class: `status ${statusClass(status)}` }, status || "?"),
+                statusPill(status),
                 swatches(row),
                 subtitle && model ? el("span", { class: "meta" }, model) : null)),
             fields)),

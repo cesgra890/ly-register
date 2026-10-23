@@ -64,7 +64,7 @@
           el("div", { class: "card-body" },
             el("div", { class: "card-top" },
               el("span", { class: "reg" }, regMark(row)),
-              el("span", { class: `status ${statusClass(status)}` }, status || "?")),
+              statusPill(status)),
             el("div", { class: "branding" }, isBlank(row.branding) ? "—" : row.branding),
             el("div", { class: "card-top" },
               el("span", { class: "meta" }, model || "Unknown make"),
