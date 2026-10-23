@@ -3,7 +3,7 @@
 // Paste your Google Sheet's published CSV link here:
 //   File → Share → Publish to web → (choose the sheet) → Comma-separated values (.csv)
 // Leave empty to use the local register.csv copy.
-const SHEET_CSV_URL = "";
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWB9KoP8wProGKMzxsNqjgZOnnypSiqhgZoCKDckJJ_gVc433W7e2Nf1crqEtzjaImS6YNlAKZ8AS3/pub?gid=0&single=true&output=csv";
 const LOCAL_CSV_URL = "register.csv";
 const CACHE_KEY = "ly-register-v1";
 
@@ -13,6 +13,34 @@ const COLOR_TAGS = {
   black: "#1a1a1a", orange: "#f08a24", gray: "#8a8f98", silver: "#c4c9d0",
   pink: "#ee7fb4", gold: "#c9a227", purple: "#7a3fb0", transparent: "transparent",
 };
+
+// Tag pill colours: [background, text]. Tags not listed use DEFAULT_TAG_STYLE.
+const DEFAULT_TAG_STYLE = ["#F5F5F5", "#333333"];
+const TAG_STYLES = {
+  black: ["#F5F5F5", "#3D3D3D"],
+  blue: ["#C0E1F6", "#0953A9"],
+  "blue-dark": ["#0953A9", "#ADD0EE"],
+  gold: ["#FFC71B", "#473821"],
+  green: ["#D4EDBD", "#13734B"],
+  "green-dark": ["#13734B", "#D4EDBD"],
+  orange: ["#F37F09", "#FFFFFF"],
+  pink: ["#FA73BC", "#FFFFFF"],
+  purple: ["#BA08B3", "#FFFFFF"],
+  red: ["#DD0B09", "#FFCFC9"],
+  "red-dark": ["#800000", "#FFCFC9"],
+  white: ["#FFFFFF", "#333333"],
+  yellow: ["#FFE5A1", "#473821"],
+};
+
+// Matches with or without the leading dot of "private" tags like ".duplicate".
+function tagStyle(tag) {
+  return TAG_STYLES[tag.toLowerCase().replace(/^\./, "")] || DEFAULT_TAG_STYLE;
+}
+
+function tagPill(tag) {
+  const [bg, fg] = tagStyle(tag);
+  return el("span", { class: "tag", style: `--tag-bg:${bg};--tag-fg:${fg}` }, tag);
+}
 
 function parseCsv(text) {
   const result = Papa.parse(text, { header: true, skipEmptyLines: true });

@@ -152,6 +152,11 @@ a { color: inherit; }
 .fields dd a { color: var(--accent); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { font-family: var(--mono); font-size: 12px; padding: 2px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.tag {
+  font-size: 14px; line-height: 1.4; padding: 2px 8px; border-radius: 6px;
+  background: var(--tag-bg); color: var(--tag-fg);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.06);
+}
 @media (max-width: 480px) {
   .fields { grid-template-columns: 1fr; }
   .fields dt { border-bottom: 0; padding-bottom: 0; }
@@ -161,3 +166,7 @@ a { color: inherit; }
 .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 32px; }
 .pager a { font-family: var(--mono); text-decoration: none; padding: 8px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
 .pager a:hover { border-color: var(--accent); color: var(--accent); }
+
+html {
+  scrollbar-gutter: stable;
+}

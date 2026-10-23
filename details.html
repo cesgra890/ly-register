@@ -28,7 +28,10 @@
 
     function fieldValue(column, value) {
       if (isBlank(value)) return el("dd", { class: "blank" }, "—");
-      if (column === "reg. history" || column === "tags_") {
+      if (column === "tags_") {
+        return el("dd", {}, el("div", { class: "chips" }, splitTags(value).map(tagPill)));
+      }
+      if (column === "reg. history") {
         return el("dd", {}, el("div", { class: "chips" }, splitTags(value).map((t) => el("span", { class: "chip" }, t))));
       }
       if (/^https?:\/\//i.test(value.trim())) {
