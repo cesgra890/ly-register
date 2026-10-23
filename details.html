@@ -45,6 +45,7 @@
       const next = el("button", { class: "carousel-btn next", type: "button", "aria-label": "Next photo" }, "›");
       const dots = el("div", { class: "carousel-dots" });
       const counter = el("span", { class: "carousel-count", "aria-live": "polite" });
+      const placeholder = el("div", { class: "img-placeholder", "aria-hidden": "true" }, balloonIcon());
       let current = 0;
 
       const slides = () => [...track.children];
@@ -56,11 +57,8 @@
 
       function update() {
         const n = slides().length;
-        if (n === 0) {
-          wrap.className = "img-wrap";
-          wrap.replaceChildren(el("div", { class: "img-placeholder", "aria-hidden": "true" }, balloonIcon()));
-          return;
-        }
+        wrap.classList.toggle("empty", n === 0);
+        placeholder.hidden = n > 0;
         const multi = n > 1;
         wrap.classList.toggle("multi", multi);
         wrap.tabIndex = multi ? 0 : -1;
@@ -71,13 +69,14 @@
           el("button", { type: "button", class: "dot", "aria-label": `Photo ${i + 1}`, "aria-current": i === current ? "true" : null, onclick: () => go(i) })));
       }
 
-      srcs.forEach((src, i) => {
+      function addPhoto(src) {
         // Not lazy: a missing photo should drop out before anyone swipes to it.
-        const img = el("img", { src, alt: `${alt}, photo ${i + 1}`, draggable: "false" });
+        const img = el("img", { src, alt: `${alt}, photo ${slides().length + 1}`, draggable: "false" });
         const slide = el("div", { class: "slide" }, img);
-        img.addEventListener("error", () => { slide.remove(); current = Math.min(current, slides().length - 1); update(); });
+        img.addEventListener("error", () => { slide.remove(); current = Math.max(0, Math.min(current, slides().length - 1)); update(); });
         track.append(slide);
-      });
+        update();
+      }
 
       let frame;
       track.addEventListener("scroll", () => {
@@ -96,8 +95,10 @@
 
       wrap.setAttribute("aria-roledescription", "carousel");
       wrap.setAttribute("aria-label", `${alt} photos`);
-      wrap.append(track, prev, next, dots, counter);
+      wrap.append(track, placeholder, prev, next, dots, counter);
       update();
+      srcs.forEach(addPhoto);
+      wrap.addPhoto = addPhoto;
       return wrap;
     }
 
@@ -125,9 +126,15 @@
       const link = (r, text) => r ? el("a", { href: `details.html?id=${encodeURIComponent(r.id)}` }, text) : el("span");
       const markOf = (r) => r && (isBlank(r["registration mark"]) ? r.id : r["registration mark"]);
 
+      // index.json may be missing or out of date (e.g. photos uploaded by hand),
+      // so also look for further <id>-N.jpg files beyond what it lists.
+      const photos = photoSrcs(row, photoIndex);
+      const gallery = carousel(photos, `${reg} balloon`);
+      if (photos.length) findMorePhotos(row.id, photos.length + 1, gallery.addPhoto);
+
       content.replaceChildren(
         el("article", { class: "detail" },
-          carousel(photoSrcs(row, photoIndex), `${reg} balloon`),
+          gallery,
           el("div", {},
             el("header", { class: "detail-head" },
               el("h1", {}, reg),

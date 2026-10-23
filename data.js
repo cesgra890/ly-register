@@ -155,8 +155,21 @@ function photoSrcs(row, index) {
   if (!cover) return [];
   const count = index[row.id] || 1;
   const srcs = [cover];
-  for (let n = 2; n <= count; n++) srcs.push(IMAGE_DIR + encodeURIComponent(`${row.id}-${n}.jpg`));
+  for (let n = 2; n <= count; n++) srcs.push(photoSrc(row.id, n));
   return srcs;
+}
+
+function photoSrc(id, n) {
+  return IMAGE_DIR + encodeURIComponent(`${id}-${n}.jpg`);
+}
+
+// Try <id>-n.jpg, <id>-(n+1).jpg, ... and report each one that exists, stopping at the first gap.
+function findMorePhotos(id, n, onFound, limit = 30) {
+  if (n > limit) return;
+  const src = photoSrc(id, n);
+  const probe = new Image();
+  probe.onload = () => { onFound(src); findMorePhotos(id, n + 1, onFound, limit); };
+  probe.src = src;
 }
 
 function balloonIcon() {

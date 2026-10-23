@@ -92,6 +92,8 @@ a { color: inherit; }
 
 /* Details page photo carousel */
 .carousel { position: relative; display: block; }
+.carousel.empty { display: grid; }
+.carousel.empty .carousel-track { display: none; }
 .carousel:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .carousel-track {
   display: flex; width: 100%; height: 100%;
