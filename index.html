@@ -83,11 +83,19 @@
         (!maker || r["manufacturer_"] === maker) &&
         (!q || fields.some((f) => (r[f] || "").toLowerCase().includes(q))));
 
+      // Dates/years sort as text; values that aren't one ("-", "n/a", "TBD.", empty) always go last.
+      const byDate = (key, desc) => (a, b) => {
+        const va = (a[key] || "").trim(), vb = (b[key] || "").trim();
+        const da = /^\d/.test(va), db = /^\d/.test(vb);
+        if (da !== db) return da ? -1 : 1;
+        if (!da) return byReg(a, b);
+        return desc ? vb.localeCompare(va) : va.localeCompare(vb);
+      };
       const by = {
         reg: byReg,
-        "year-desc": (a, b) => (b["build year"] || "").localeCompare(a["build year"] || ""),
-        "year-asc": (a, b) => (a["build year"] || "9999").localeCompare(b["build year"] || "9999"),
-        "caa-desc": (a, b) => (b["CAA registration"] || "").localeCompare(a["CAA registration"] || ""),
+        "year-desc": byDate("build year", true),
+        "year-asc": byDate("build year", false),
+        "caa-desc": byDate("CAA registration", true),
       }[sort];
       rows = rows.slice().sort(by);
 
