@@ -121,7 +121,8 @@
       const subtitle = [row.branding, row["branding extra"]].filter((v) => !isBlank(v)).join(" — ");
 
       const fields = el("dl", { class: "fields" },
-        Object.keys(row).flatMap((col) => {
+        // Columns starting with "." are private notes for the sheet, not for visitors.
+        Object.keys(row).filter((col) => !col.trim().startsWith(".")).flatMap((col) => {
           const dd = fieldValue(col, row[col]);
           // Balloons that came to Lithuania new get a green mark after their registration date.
           if (col === "CAA registration" && (row.freshness || "").trim().toLowerCase() === "arrived fresh") {
