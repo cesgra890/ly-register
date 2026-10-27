@@ -16,7 +16,8 @@ For every row in the register:
   * .img empty            -> files in photos-original/ named after the id: ly-auz.jpg
                              (cover), ly-auz-2.jpg, ly-auz-3.jpg, ... (any case/extension)
 
-Finally images/index.json is written with the number of photos per id, which the
+Finally index.json (next to index.html) is written with the total number of photos
+in images/ and the number of photos per id, which the
 details page uses to build its carousel. Extra <id>-N.jpg files left over from an
 earlier run with more photos are removed.
 
@@ -57,8 +58,8 @@ def convert(src, dst, size, quality):
     subprocess.run(cmd, capture_output=True, text=True, check=True)
 
 
-def write_index(out):
-    """Write out/index.json: photo count per id, from the <id>.jpg / <id>-N.jpg files in out/."""
+def write_index(out, path):
+    """Write index.json at path: "total" photos in out/, then photo count per id from its <id>.jpg / <id>-N.jpg files."""
     names = {p.stem for p in out.glob("*.jpg")}
     index = {}
     for stem in names:
@@ -68,8 +69,9 @@ def write_index(out):
         while f"{stem}-{count + 1}" in names:
             count += 1
         index[stem] = count
-    (out / "index.json").write_text(json.dumps(index, indent=0, sort_keys=True) + "\n")
-    return index
+    data = {"total": len(names), **dict(sorted(index.items()))}
+    path.write_text(json.dumps(data, indent=0, ensure_ascii=False) + "\n")
+    return index, len(names)
 
 
 def main():
@@ -80,15 +82,16 @@ def main():
     parser.add_argument("--size", type=int, default=1200, help="longest side in pixels (default: 1200)")
     parser.add_argument("--quality", type=int, default=80, help="JPEG quality 1-100 (default: 80)")
     parser.add_argument("--force", action="store_true", help="redo images that already exist")
-    parser.add_argument("--index-only", action="store_true", help="only rebuild images/index.json from the files in images/")
+    parser.add_argument("--index", type=Path, default=HERE / "index.json", help="photo index file (default: index.json next to the site)")
+    parser.add_argument("--index-only", action="store_true", help="only rebuild index.json from the files in images/")
     args = parser.parse_args()
 
     if args.index_only:
         if not args.out.is_dir():
             sys.exit(f"No images folder at {args.out}.")
-        index = write_index(args.out)
+        index, total = write_index(args.out, args.index)
         multi = sum(1 for c in index.values() if c > 1)
-        print(f"{len(index)} balloons have photos ({multi} with more than one); wrote {args.out.name}/index.json.")
+        print(f"{total} photos in {args.out.name}/; {len(index)} balloons have photos ({multi} with more than one); wrote {args.index.name}.")
         return
 
     if not args.originals.is_dir():
@@ -163,14 +166,14 @@ def main():
                 made_from.pop(stale.name, None)
                 print(f"  removed {stale.name}")
 
-    index = write_index(args.out)
+    index, total = write_index(args.out, args.index)
     multi = sum(1 for c in index.values() if c > 1)
     made_from_file.write_text(json.dumps(made_from, indent=0, sort_keys=True) + "\n")
 
     unused = sorted(p.name for p in originals if p not in used)
 
     print(f"\nConverted {done}, already up to date {skipped}, marked n/a {no_photo}.")
-    print(f"{len(index)} balloons have photos ({multi} with more than one); wrote {args.out.name}/index.json.")
+    print(f"{total} photos in {args.out.name}/; {len(index)} balloons have photos ({multi} with more than one); wrote {args.index.name}.")
     if missing:
         print(f"\n{len(missing)} photos not found:")
         print("\n".join(f"  {m}" for m in missing))

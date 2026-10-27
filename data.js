@@ -170,11 +170,11 @@ function imageSrc(row) {
   return IMAGE_DIR + encodeURIComponent(`${row.id}.jpg`);
 }
 
-// images/index.json ({ id: photo count }) is written by prepare_images.py and lists
+// index.json ({ total, id: photo count }) is written by prepare_images.py and lists
 // every photo that exists, so the site never asks for one that doesn't.
 // Resolves to null when there is no index; pages then fall back to guessing file names.
 async function loadPhotoIndex() {
-  const key = `${CACHE_KEY}-photos-v2`;
+  const key = `${CACHE_KEY}-photos-v3`;
   try {
     const cached = sessionStorage.getItem(key);
     if (cached) return JSON.parse(cached);
@@ -182,7 +182,7 @@ async function loadPhotoIndex() {
 
   let index = null;
   try {
-    const res = await fetch(`${IMAGE_DIR}index.json`, { cache: "no-store" });
+    const res = await fetch("index.json", { cache: "no-store" });
     if (res.ok) index = await res.json();
   } catch (_) {}
 
