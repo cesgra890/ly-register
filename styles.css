@@ -204,6 +204,7 @@ a { color: inherit; }
   .topbar, .pager { padding-left: 16px; padding-right: 16px; }
 }
 
-html {
-  scrollbar-gutter: stable;
+/* List page only: keeps the layout from shifting when filtering changes the page height. */
+html.list-page {
+  scrollbar-gutter: stable both-edges;
 }
