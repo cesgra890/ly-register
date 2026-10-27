@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Balloon · LY Balloon Register</title>
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="data.js?v=3"></script>
+  <script src="data.js?v=4"></script>
 </head>
 <body>
   <main class="page">
@@ -121,7 +121,14 @@
       const subtitle = [row.branding, row["branding extra"]].filter((v) => !isBlank(v)).join(" — ");
 
       const fields = el("dl", { class: "fields" },
-        Object.keys(row).flatMap((col) => [el("dt", {}, labelFor(col)), fieldValue(col, row[col])]));
+        Object.keys(row).flatMap((col) => {
+          const dd = fieldValue(col, row[col]);
+          // Balloons that came to Lithuania new get a green mark after their registration date.
+          if (col === "CAA registration" && (row.freshness || "").trim().toLowerCase() === "arrived fresh") {
+            dd.append(el("span", { class: "fresh-mark", title: "Arrived fresh", "aria-label": "Arrived fresh" }, "✱"));
+          }
+          return [el("dt", {}, labelFor(col)), dd];
+        }));
 
       const sorted = rows.slice().sort(byReg);
       const pos = sorted.indexOf(row);

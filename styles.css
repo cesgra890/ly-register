@@ -151,6 +151,7 @@ a { color: inherit; }
 .fields dd.blank { color: var(--muted); }
 .fields dd a { color: var(--accent); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.fresh-mark { color: #62C236; margin-left: 6px; }
 .chip { font-family: var(--mono); font-size: 12px; padding: 2px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
 .tag {
   font-size: 14px; line-height: 1.4; padding: 2px 8px; border-radius: 6px;
