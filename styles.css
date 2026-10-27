@@ -140,6 +140,7 @@ a { color: inherit; }
   --d-row: #F7F6F6;
   --d-link: #0000FF;
   --fresh: #62C236;
+  --expired: #A52A2A;
   display: flex; flex-direction: column; min-height: 100vh;
   background: var(--d-bg); color: var(--d-ink);
 }
@@ -151,6 +152,7 @@ a { color: inherit; }
     --d-line: #2d3139;
     --d-row: #1d2026;
     --d-link: #8ab4ff;
+    --expired: #E06B5F;
   }
 }
 
@@ -179,6 +181,7 @@ a { color: inherit; }
 .info-label { font-size: 12px; line-height: 15px; color: var(--d-label); }
 .info-value { display: flex; gap: 5px; margin: 0; font-size: 16px; font-weight: 500; line-height: normal; overflow-wrap: anywhere; }
 .fresh-mark { color: var(--fresh); font-weight: 400; }
+.info-value.expired { color: var(--expired); }
 
 .info-rows { display: flex; flex-direction: column; gap: 8px; margin: 0; }
 .info-row { display: flex; flex-direction: column; gap: 4px; padding: 8px; border-radius: 8px; background: var(--d-row); }
