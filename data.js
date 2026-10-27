@@ -5,7 +5,7 @@
 // Leave empty to use the local register.csv copy.
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWB9KoP8wProGKMzxsNqjgZOnnypSiqhgZoCKDckJJ_gVc433W7e2Nf1crqEtzjaImS6YNlAKZ8AS3/pub?gid=0&single=true&output=csv";
 const LOCAL_CSV_URL = "register.csv";
-const CACHE_KEY = "ly-register-v1";
+const CACHE_KEY = "ly-register-v2";
 
 const COLOR_TAGS = {
   red: "#d63a2f", "red-dark": "#8e1f1a", white: "#ffffff", blue: "#2f6fd6",
@@ -80,7 +80,7 @@ function splitTags(value) {
 }
 
 function colorTags(row) {
-  return splitTags(row["tags_"]).filter((t) => t in COLOR_TAGS);
+  return splitTags(row["tags"]).filter((t) => t in COLOR_TAGS);
 }
 
 function labelFor(column) {

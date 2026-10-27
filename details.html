@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Balloon · LY Balloon Register</title>
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=3">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="data.js?v=2"></script>
+  <script src="data.js?v=3"></script>
 </head>
 <body>
   <main class="page">
@@ -28,8 +28,8 @@
 
     function fieldValue(column, value) {
       if (isBlank(value)) return el("dd", { class: "blank" }, "—");
-      if (column === "CAA status_") return el("dd", {}, statusPill(value));
-      if (column === "tags_") {
+      if (column === "CAA status") return el("dd", {}, statusPill(value));
+      if (column === "tags") {
         return el("dd", {}, el("div", { class: "chips" }, splitTags(value).map(tagPill)));
       }
       if (column === "reg. history") {
@@ -116,8 +116,8 @@
       const reg = regMark(row);
       document.title = `${reg} · LY Balloon Register`;
 
-      const status = row["CAA status_"];
-      const model = [row["manufacturer_"], row.model].filter((v) => !isBlank(v)).join(" ");
+      const status = row["CAA status"];
+      const model = [row["manufacturer"], row.model].filter((v) => !isBlank(v)).join(" ");
       const subtitle = [row.branding, row["branding extra"]].filter((v) => !isBlank(v)).join(" — ");
 
       const fields = el("dl", { class: "fields" },
