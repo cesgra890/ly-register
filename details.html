@@ -4,15 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Balloon · LY Balloon Register</title>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="styles.css?v=5">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="data.js?v=4"></script>
+  <script src="data.js?v=5"></script>
 </head>
-<body>
-  <main class="page">
-    <a class="back" id="back" href="index.html">← All balloons</a>
-    <div id="content"></div>
-  </main>
+<body class="details-page">
+  <nav class="topbar" aria-label="Breadcrumb">
+    <a class="crumb-back" id="back" href="index.html">‹ All balloons</a>
+    <span class="crumb-sep" aria-hidden="true">/</span>
+    <span class="crumb-current" id="crumb" aria-current="page"></span>
+  </nav>
+  <main class="details-main" id="content"></main>
+  <nav class="pager" id="pager" aria-label="Other balloons"></nav>
 
   <script>
     const content = document.getElementById("content");
@@ -26,19 +32,33 @@
       }
     }
 
-    function fieldValue(column, value) {
-      if (isBlank(value)) return el("dd", { class: "blank" }, "—");
-      if (column === "CAA status") return el("dd", {}, statusPill(value));
-      if (column === "tags") {
-        return el("dd", {}, el("div", { class: "chips" }, splitTags(value).map(tagPill)));
+    // First of several possible column names that exists in the row (the sheet spells one "contruction no.").
+    function col(row, ...names) {
+      const name = names.find((n) => n in row);
+      return name ? row[name] : "";
+    }
+
+    function withUnit(value, unit) {
+      if (isBlank(value)) return "—";
+      return unit && !value.includes(unit.trim()) ? `${value} ${unit}` : value;
+    }
+
+    // Label above value, as in the "Detail row" component.
+    function infoCell(label, value, extra) {
+      return el("div", { class: "info-cell" },
+        el("dt", { class: "info-label" }, label),
+        el("dd", { class: `info-value${value === "—" ? " blank" : ""}` }, value, extra));
+    }
+
+    // Grey "Detail row Alt" box; left out when there is nothing to show.
+    function infoRow(label, value) {
+      if (value == null || (typeof value === "string" && isBlank(value))) return null;
+      if (typeof value === "string" && /^https?:\/\//i.test(value.trim())) {
+        value = el("a", { href: value.trim(), target: "_blank", rel: "noopener noreferrer" }, "Open link ↗");
       }
-      if (column === "reg. history") {
-        return el("dd", {}, el("div", { class: "chips" }, splitTags(value).map((t) => el("span", { class: "chip" }, t))));
-      }
-      if (/^https?:\/\//i.test(value.trim())) {
-        return el("dd", {}, el("a", { href: value.trim(), target: "_blank", rel: "noopener noreferrer" }, "Open link ↗"));
-      }
-      return el("dd", {}, value);
+      return el("div", { class: "info-row" },
+        el("dt", { class: "info-label" }, label),
+        el("dd", { class: "info-value" }, value));
     }
 
     // Swipeable photo strip; with one photo it's a plain image, with none the placeholder.
@@ -117,26 +137,52 @@
       document.title = `${reg} · LY Balloon Register`;
 
       const status = row["CAA status"];
-      const model = [row["manufacturer"], row.model].filter((v) => !isBlank(v)).join(" ");
-      const subtitle = [row.branding, row["branding extra"]].filter((v) => !isBlank(v)).join(" — ");
+      document.getElementById("crumb").textContent = reg;
 
-      const fields = el("dl", { class: "fields" },
-        // Columns starting with "." are private notes for the sheet, not for visitors.
-        Object.keys(row).filter((col) => !col.trim().startsWith(".")).flatMap((col) => {
-          const dd = fieldValue(col, row[col]);
-          // Balloons that came to Lithuania new get a green mark after their registration date.
-          if (col === "CAA registration" && (row.freshness || "").trim().toLowerCase() === "arrived fresh") {
-            dd.append(el("span", { class: "fresh-mark", title: "Arrived fresh", "aria-label": "Arrived fresh" }, "✱"));
-          }
-          return [el("dt", {}, labelFor(col)), dd];
-        }));
+      const aircraft = [
+        ["Manufacturer", row.manufacturer],
+        ["Model", row.model],
+        ["Construction no.", col(row, "construction no.", "contruction no.")],
+        ["Volume", withUnit(row.volume, "m³")],
+        ["Build year", row["build year"]],
+        ["MTOW", withUnit(row.MTOW, "kg")],
+      ];
+      // Balloons that came to Lithuania new get a green mark after their registration date.
+      const fresh = (row.freshness || "").trim().toLowerCase() === "arrived fresh"
+        ? el("span", { class: "fresh-mark", title: "Arrived fresh", "aria-label": "Arrived fresh" }, "✱") : null;
+      const registration = [
+        ["CAA registration", row["CAA registration"], fresh],
+        ["CAA status", isBlank(status) ? "" : STATUS_STYLES[statusSlug(status)][0]],
+        ["CAA last update", row["CAA last update"]],
+        ["ARC expiry", row["ARC expiry"]],
+      ];
+      const grid = (cells) => el("dl", { class: "info-grid" },
+        cells.map(([label, value, extra]) => infoCell(label, isBlank(value) ? "—" : value, extra)));
+
+      // Columns shown above; any other column (except private "." ones) gets a grey row before Tags.
+      const shown = new Set(["id", "registration mark", "branding", "branding extra", "manufacturer", "model",
+        "construction no.", "contruction no.", "volume", "build year", "MTOW", "CAA registration", "CAA status",
+        "CAA last update", "ARC expiry", "reg. history", "owner", "notes", "tags"]);
+      const extras = Object.keys(row).filter((c) => !c.trim().startsWith(".") && !shown.has(c));
+      const tags = splitTags(row.tags);
+
+      const title = el("div", { class: "title-row" }, el("h1", {}, reg), statusPill(status));
+      title.lastChild.classList.add("status-lg");
+      const name = [row.branding, row["branding extra"]].some((v) => !isBlank(v))
+        ? el("p", { class: "name" },
+            isBlank(row.branding) ? null : el("strong", {}, row.branding),
+            isBlank(row["branding extra"]) ? null : `${isBlank(row.branding) ? "" : "· "}${row["branding extra"]}`)
+        : null;
 
       const sorted = rows.slice().sort(byReg);
       const pos = sorted.indexOf(row);
       const prev = sorted[pos - 1];
       const next = sorted[pos + 1];
-      const link = (r, text) => r ? el("a", { href: `details.html?id=${encodeURIComponent(r.id)}` }, text) : el("span");
-      const markOf = (r) => r && (isBlank(r["registration mark"]) ? r.id : r["registration mark"]);
+      const markOf = (r) => isBlank(r["registration mark"]) ? r.id : r["registration mark"];
+      const link = (r, dir) => !r ? el("span") :
+        el("a", { href: `details.html?id=${encodeURIComponent(r.id)}`, rel: dir },
+          dir === "prev" ? [el("span", { "aria-hidden": "true" }, "←"), markOf(r)] : [markOf(r), el("span", { "aria-hidden": "true" }, "→")]);
+      document.getElementById("pager").replaceChildren(link(prev, "prev"), link(next, "next"));
 
       // index.json may be missing or out of date (e.g. photos uploaded by hand),
       // so also look for further <id>-N.jpg files beyond what it lists.
@@ -147,18 +193,19 @@
       content.replaceChildren(
         el("article", { class: "detail" },
           gallery,
-          el("div", {},
-            el("header", { class: "detail-head" },
-              el("h1", {}, reg),
-              el("p", { class: "subtitle" }, subtitle || model || "—"),
-              el("div", { class: "row" },
-                statusPill(status),
-                swatches(row),
-                subtitle && model ? el("span", { class: "meta" }, model) : null)),
-            fields)),
-        el("nav", { class: "pager" },
-          link(prev, `← ${markOf(prev)}`),
-          link(next, `${markOf(next)} →`)));
+          el("div", { class: "detail-info" },
+            el("section", { class: "info-top" },
+              el("header", { class: "detail-head" }, title, name),
+              el("hr", { class: "divider" }),
+              grid(aircraft),
+              el("hr", { class: "divider" }),
+              grid(registration)),
+            el("dl", { class: "info-rows" },
+              infoRow("Registration history", row["reg. history"]),
+              infoRow("Owner", row.owner),
+              infoRow("Notes", row.notes),
+              extras.map((c) => infoRow(labelFor(c).replace(/^./, (ch) => ch.toUpperCase()), row[c])),
+              tags.length ? infoRow("Tags", el("div", { class: "tags" }, tags.map(tagPill))) : null))));
     }
 
     Promise.all([loadBalloons(), loadPhotoIndex()]).then(render).catch((err) => {
