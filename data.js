@@ -145,12 +145,12 @@ function swatches(row) {
     tags.map((t) => el("span", { class: "swatch", style: `--c:${COLOR_TAGS[t]}` })));
 }
 
-function balloonImage(row, className) {
+function balloonImage(row, index, className) {
   const wrap = el("div", { class: `img-wrap ${className || ""}` });
   const placeholder = () => {
     wrap.replaceChildren(el("div", { class: "img-placeholder", "aria-hidden": "true" }, balloonIcon()));
   };
-  const src = imageSrc(row);
+  const src = photoSrcs(row, index)[0];
   if (!src) {
     placeholder();
   } else {
@@ -170,15 +170,17 @@ function imageSrc(row) {
   return IMAGE_DIR + encodeURIComponent(`${row.id}.jpg`);
 }
 
-// images/index.json ({ id: photo count }) is written by prepare_images.py.
+// images/index.json ({ id: photo count }) is written by prepare_images.py and lists
+// every photo that exists, so the site never asks for one that doesn't.
+// Resolves to null when there is no index; pages then fall back to guessing file names.
 async function loadPhotoIndex() {
-  const key = `${CACHE_KEY}-photos`;
+  const key = `${CACHE_KEY}-photos-v2`;
   try {
     const cached = sessionStorage.getItem(key);
     if (cached) return JSON.parse(cached);
   } catch (_) {}
 
-  let index = {};
+  let index = null;
   try {
     const res = await fetch(`${IMAGE_DIR}index.json`, { cache: "no-store" });
     if (res.ok) index = await res.json();
@@ -191,10 +193,12 @@ async function loadPhotoIndex() {
 }
 
 // All photos for a balloon: the cover <id>.jpg, then <id>-2.jpg, <id>-3.jpg, ...
+// With an index, exactly the photos it lists; without one, a guess at the cover.
 function photoSrcs(row, index) {
   const cover = imageSrc(row);
   if (!cover) return [];
-  const count = index[row.id] || 1;
+  const count = index ? index[row.id] || 0 : 1;
+  if (count === 0) return [];
   const srcs = [cover];
   for (let n = 2; n <= count; n++) srcs.push(photoSrc(row.id, n));
   return srcs;

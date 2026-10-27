@@ -20,6 +20,9 @@ Finally images/index.json is written with the number of photos per id, which the
 details page uses to build its carousel. Extra <id>-N.jpg files left over from an
 earlier run with more photos are removed.
 
+Added photos to images/ by hand? Run with --index-only to just rebuild index.json
+from the files in images/ (no originals needed). The site only shows photos listed there.
+
 Images are shrunk so the longest side is at most --size pixels (never enlarged)
 and saved as JPEG. Uses macOS's built-in `sips`, so HEIC photos work too.
 Already-converted photos are skipped unless the original is newer or --force is given.
@@ -54,6 +57,21 @@ def convert(src, dst, size, quality):
     subprocess.run(cmd, capture_output=True, text=True, check=True)
 
 
+def write_index(out):
+    """Write out/index.json: photo count per id, from the <id>.jpg / <id>-N.jpg files in out/."""
+    names = {p.stem for p in out.glob("*.jpg")}
+    index = {}
+    for stem in names:
+        if re.search(r"-\d+$", stem):
+            continue  # a carousel photo; counted with its cover below
+        count = 1
+        while f"{stem}-{count + 1}" in names:
+            count += 1
+        index[stem] = count
+    (out / "index.json").write_text(json.dumps(index, indent=0, sort_keys=True) + "\n")
+    return index
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--csv", type=Path, default=HERE / "register.csv", help="register CSV (default: register.csv)")
@@ -62,7 +80,16 @@ def main():
     parser.add_argument("--size", type=int, default=1200, help="longest side in pixels (default: 1200)")
     parser.add_argument("--quality", type=int, default=80, help="JPEG quality 1-100 (default: 80)")
     parser.add_argument("--force", action="store_true", help="redo images that already exist")
+    parser.add_argument("--index-only", action="store_true", help="only rebuild images/index.json from the files in images/")
     args = parser.parse_args()
+
+    if args.index_only:
+        if not args.out.is_dir():
+            sys.exit(f"No images folder at {args.out}.")
+        index = write_index(args.out)
+        multi = sum(1 for c in index.values() if c > 1)
+        print(f"{len(index)} balloons have photos ({multi} with more than one); wrote {args.out.name}/index.json.")
+        return
 
     if not args.originals.is_dir():
         sys.exit(f"No originals folder at {args.originals}. Put the downloaded photos there first.")
@@ -136,17 +163,7 @@ def main():
                 made_from.pop(stale.name, None)
                 print(f"  removed {stale.name}")
 
-    # Photo count per id, from what is actually in the output folder.
-    index = {}
-    for row in rows:
-        balloon_id = row["id"].strip()
-        if not (args.out / f"{balloon_id}.jpg").exists():
-            continue
-        count = 1
-        while (args.out / f"{balloon_id}-{count + 1}.jpg").exists():
-            count += 1
-        index[balloon_id] = count
-    (args.out / "index.json").write_text(json.dumps(index, indent=0, sort_keys=True) + "\n")
+    index = write_index(args.out)
     multi = sum(1 for c in index.values() if c > 1)
     made_from_file.write_text(json.dumps(made_from, indent=0, sort_keys=True) + "\n")
 
