@@ -26,10 +26,10 @@
       <select id="status" aria-label="CAA status"><option value="">All statuses</option></select>
       <select id="maker" aria-label="Manufacturer"><option value="">All manufacturers</option></select>
       <select id="sort" aria-label="Sort">
+        <option value="caa-desc">Latest CAA registration</option>
         <option value="reg">Sort: registration</option>
         <option value="year-desc">Newest built</option>
         <option value="year-asc">Oldest built</option>
-        <option value="caa-desc">Latest CAA registration</option>
       </select>
     </div>
 
@@ -54,7 +54,7 @@
 
     function writeUrlState() {
       const params = new URLSearchParams();
-      for (const id of controls) if ($(id).value && !(id === "sort" && $(id).value === "reg")) params.set(id, $(id).value);
+      for (const id of controls) if ($(id).value && !(id === "sort" && $(id).value === "caa-desc")) params.set(id, $(id).value);
       const qs = params.toString();
       history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
     }

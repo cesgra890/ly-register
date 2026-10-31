@@ -166,7 +166,7 @@
         ["Construction no.", col(row, "construction no.", "contruction no.")],
         ["Volume", withUnit(row.volume, "m³")],
         ["Build year", row["build year"]],
-        [el("abbr", { title: "Maximum Takeoff Weight" }, "MTOW"), withUnit(row.MTOW, "kg")],
+        [el("abbr", { title: "Maximum Takeoff Weight" }, "Takeoff Weight"), withUnit(row.MTOW, "kg")],
       ];
       // Balloons that came to Lithuania new get a green mark after their registration date.
       const fresh = (col(row, ".freshness", "freshness") || "").trim().toLowerCase() === "arrived fresh"
