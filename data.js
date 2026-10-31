@@ -7,13 +7,6 @@ const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWB9KoP8
 const LOCAL_CSV_URL = "register.csv";
 const CACHE_KEY = "ly-register-v2";
 
-const COLOR_TAGS = {
-  red: "#d63a2f", "red-dark": "#8e1f1a", white: "#ffffff", blue: "#2f6fd6",
-  "blue-dark": "#1b3a7a", yellow: "#f2c230", green: "#3a9a4a", "green-dark": "#1f5a2a",
-  black: "#1a1a1a", orange: "#f08a24", gray: "#8a8f98", silver: "#c4c9d0",
-  pink: "#ee7fb4", gold: "#c9a227", purple: "#7a3fb0", transparent: "transparent",
-};
-
 // Tag pill colours: [background, text]. Tags not listed use DEFAULT_TAG_STYLE.
 const DEFAULT_TAG_STYLE = ["#F5F5F5", "#333333"];
 const TAG_STYLES = {
@@ -79,10 +72,6 @@ function splitTags(value) {
   return (value || "").split(",").map((t) => t.trim()).filter(Boolean);
 }
 
-function colorTags(row) {
-  return splitTags(row["tags"]).filter((t) => t in COLOR_TAGS);
-}
-
 function labelFor(column) {
   return column.replace(/_+$/, "");
 }
@@ -136,13 +125,6 @@ function el(tag, attrs = {}, ...children) {
     node.append(child instanceof Node ? child : document.createTextNode(String(child)));
   }
   return node;
-}
-
-function swatches(row) {
-  const tags = colorTags(row);
-  if (!tags.length) return null;
-  return el("span", { class: "swatches", title: tags.join(", ") },
-    tags.map((t) => el("span", { class: "swatch", style: `--c:${COLOR_TAGS[t]}` })));
 }
 
 function balloonImage(row, index, className) {

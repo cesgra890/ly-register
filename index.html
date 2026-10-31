@@ -4,9 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LY Balloon Register</title>
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,400..700&display=swap">
+  <link rel="stylesheet" href="styles.css?v=13">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="data.js?v=9"></script>
+  <script src="data.js?v=10"></script>
 </head>
 <body>
   <main class="page">
@@ -58,7 +61,7 @@
 
     function card(row) {
       const status = row["CAA status"];
-      const model = [row["manufacturer"], row.model].filter((v) => !isBlank(v)).join(" · ");
+      const model = [row["manufacturer"], row.model].filter((v) => !isBlank(v)).join(" ∙ ");
       return el("li", {},
         el("a", { class: "card", href: `details.html?id=${encodeURIComponent(row.id)}` },
           balloonImage(row, photoIndex),
@@ -67,9 +70,9 @@
               el("span", { class: "reg" }, regMark(row)),
               statusPill(status)),
             el("div", { class: "branding" }, isBlank(row.branding) ? "—" : row.branding),
-            el("div", { class: "card-top" },
-              el("span", { class: "meta" }, model || "Unknown make"),
-              swatches(row)))));
+            el("div", { class: "card-meta" },
+              el("div", { class: "meta" }, model || "Unknown make"),
+              el("div", { class: "card-date" }, isBlank(row["CAA registration"]) ? "—" : row["CAA registration"])))));
     }
 
     function render() {
