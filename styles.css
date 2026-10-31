@@ -95,7 +95,7 @@ a { color: inherit; }
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .reg { color: var(--card-ink); font-size: 21px; font-weight: 700; line-height: 20px; white-space: nowrap; }
 .card .status { padding: 4px; border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 12px; letter-spacing: -0.24px; }
-.branding { color: var(--card-ink); font-size: 14px; font-weight: 600; line-height: normal; letter-spacing: 0.1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.branding { color: var(--card-ink); font-size: 14px; font-weight: 500; line-height: normal; letter-spacing: 0.1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-meta { display: grid; gap: 4px; font-size: 12px; line-height: normal; letter-spacing: 0.1px; }
 .meta { color: var(--card-meta); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-date { color: var(--card-date); }
