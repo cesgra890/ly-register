@@ -17,7 +17,7 @@ For every row in the register:
                              (cover), ly-auz__2.jpg, ly-auz__3.jpg, ... (any case/extension)
 
 Each cover also gets a 10:7 centre-cropped copy for the list page's cards, in
-images/cards/<id>.jpg. Prefer your own crop? Save it over that file: a card is only
+images/index-cards/<id>.jpg. Prefer your own crop? Save it over that file: a card is only
 remade when its cover is newer, or with --force.
 
 Finally index.json (next to index.html) is written with the total number of photos
@@ -83,7 +83,7 @@ def make_card(src, dst, quality):
 
 
 def make_cards(details, cards, quality, force):
-    """Make cards/<id>.jpg for each cover in details/, keep newer ones (they may be hand-made), drop orphans. Returns (made, failed)."""
+    """Make index-cards/<id>.jpg for each cover in details/, keep newer ones (they may be hand-made), drop orphans. Returns (made, failed)."""
     cards.mkdir(exist_ok=True)
     covers = {p.stem: p for p in details.glob("*.jpg") if "__" not in p.stem}
     made, failed = 0, []
@@ -124,7 +124,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--csv", type=Path, default=HERE / "register.csv", help="register CSV (default: register.csv)")
     parser.add_argument("--originals", type=Path, default=HERE / "photos-original", help="folder with downloaded photos")
-    parser.add_argument("--out", type=Path, default=HERE / "images", help="output folder, holding details/ and cards/ (default: images)")
+    parser.add_argument("--out", type=Path, default=HERE / "images", help="output folder, holding details/ and index-cards/ (default: images)")
     parser.add_argument("--size", type=int, default=1200, help="longest side in pixels (default: 1200)")
     parser.add_argument("--quality", type=int, default=80, help="JPEG quality 1-100 (default: 80)")
     parser.add_argument("--force", action="store_true", help="redo images that already exist")
@@ -132,7 +132,7 @@ def main():
     parser.add_argument("--index-only", action="store_true", help="only make cards and rebuild index.json from the files in images/details/")
     args = parser.parse_args()
     details = args.out / "details"
-    cards = args.out / "cards"
+    cards = args.out / "index-cards"
 
     if args.index_only:
         if not details.is_dir():

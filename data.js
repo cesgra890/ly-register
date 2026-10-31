@@ -150,7 +150,7 @@ function balloonImage(row, index, className) {
 // Photos live in images/details/<id>.jpg, made by prepare_images.py. The .img column
 // names the original photo for that script; "n/a" means there is no photo.
 const DETAILS_DIR = "images/details/";
-const CARDS_DIR = "images/cards/";
+const CARDS_DIR = "images/index-cards/";
 
 function imageSrc(row) {
   if ((row[".img"] || "").trim().toLowerCase() === "n/a") return null;
