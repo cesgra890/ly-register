@@ -10,7 +10,7 @@
   --warn: #b7791f;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 4px 16px rgb(0 0 0 / 0.04);
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: "Google Sans Flex", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light;
 }
 
@@ -135,12 +135,13 @@ a { color: inherit; }
 .details-page {
   --d-bg: #FAF9F9;
   --d-ink: #222222;
-  --d-label: rgb(34 34 34 / 0.4);
+  --d-value: #000000;
+  --d-label: #8F9190;
+  --d-sep: rgb(34 34 34 / 0.4);
   --d-line: #EAEAEA;
   --d-row: #F7F6F6;
   --d-link: #0000FF;
   --d-nav-bg: #FFFFFF;
-  --d-nav-ink: #666666;
   --fresh: #62C236;
   --expired: #A52A2A;
   display: flex; flex-direction: column; min-height: 100vh;
@@ -150,12 +151,13 @@ a { color: inherit; }
   .details-page {
     --d-bg: #15171b;
     --d-ink: #ecebe6;
+    --d-value: #ecebe6;
     --d-label: rgb(236 235 230 / 0.45);
+    --d-sep: rgb(236 235 230 / 0.45);
     --d-line: #2d3139;
     --d-row: #1d2026;
     --d-link: #8ab4ff;
     --d-nav-bg: #1d2026;
-    --d-nav-ink: #9a9ea8;
     --expired: #E06B5F;
   }
 }
@@ -166,12 +168,12 @@ a { color: inherit; }
 .site-flag span { height: 4.5px; background: #FFB500; }
 .site-flag span:nth-child(2) { height: 4px; background: #006C41; }
 .site-flag span:nth-child(3) { background: #D30023; }
-.site-links { display: flex; align-items: center; gap: 24px; height: 30px; color: var(--d-nav-ink); font-size: 15px; font-weight: 500; line-height: normal; letter-spacing: -0.2px; white-space: nowrap; }
+.site-links { display: flex; align-items: center; gap: 24px; height: 30px; color: var(--d-ink); font-size: 16px; line-height: 24px; white-space: nowrap; }
 
 .topbar { display: flex; align-items: center; gap: 6px; padding: 23px 24px; font-size: 14px; line-height: normal; min-width: 0; }
 .crumb-back { color: var(--d-link); font-weight: 500; text-decoration: none; white-space: nowrap; }
 .crumb-back:hover { text-decoration: underline; }
-.crumb-sep { color: var(--d-label); }
+.crumb-sep { color: var(--d-sep); }
 .crumb-current { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .details-main { flex: 1; width: 100%; max-width: 956px; margin: 0 auto; padding: 16px 16px 64px; }
@@ -181,8 +183,8 @@ a { color: inherit; }
 .info-top { display: flex; flex-direction: column; gap: 24px; padding: 8px; }
 
 .title-row { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-.title-row h1 { margin: 0; font-size: 36px; font-weight: 700; line-height: 32px; }
-.status.status-lg { font-size: 14px; font-weight: 500; line-height: 12px; letter-spacing: -0.24px; padding: 6px 10px; border-radius: 8px; }
+.title-row h1 { margin: 0; font-size: 36px; font-weight: 700; line-height: 32px; letter-spacing: -0.36px; }
+.status.status-lg { font-size: 14px; font-weight: 500; line-height: 12px; padding: 6px 8px; border-radius: 8px; }
 .name { display: flex; flex-wrap: wrap; gap: 5px; margin: 12px 0 0; font-size: 16px; line-height: 24px; }
 .name strong { font-weight: 500; }
 
@@ -192,13 +194,14 @@ a { color: inherit; }
 .info-cell { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .info-label { font-size: 12px; line-height: 15px; color: var(--d-label); }
 .info-label abbr { text-decoration: none; cursor: help; }
-.info-value { display: flex; gap: 5px; margin: 0; font-size: 16px; font-weight: 500; line-height: normal; overflow-wrap: anywhere; }
+.info-value { display: flex; gap: 5px; margin: 0; color: var(--d-value); font-size: 16px; line-height: normal; overflow-wrap: anywhere; }
 .fresh-mark { color: var(--fresh); font-weight: 400; }
 .info-value.expired { color: var(--expired); }
 
 .info-rows { display: flex; flex-direction: column; gap: 8px; margin: 0; }
 .info-row { display: flex; flex-direction: column; gap: 4px; padding: 8px; border-radius: 8px; background: var(--d-row); }
-.info-row .info-value { display: block; font-size: 14px; font-weight: 400; white-space: pre-line; }
+.info-row:has(.tags) { align-self: flex-start; }
+.info-row .info-value { display: block; white-space: pre-line; }
 .info-row a { color: var(--d-link); }
 
 .tags { display: flex; flex-wrap: wrap; gap: 5px; white-space: normal; }
