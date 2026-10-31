@@ -7,15 +7,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,400..700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=16">
+  <link rel="stylesheet" href="styles.css?v=18">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="data.js?v=19"></script>
 </head>
-<body>
+<body class="index-page">
+  <header class="site-nav">
+    <a class="site-brand" href="index.html">
+      <span class="site-flag" aria-hidden="true"><span></span><span></span><span></span></span>
+      LY&ndash;Register
+    </a>
+    <div class="site-links">
+      <span>Hot Air Balloons</span>
+      <span>Clubs</span>
+      <span>Links</span>
+      <span>About</span>
+    </div>
+  </header>
   <main class="page">
     <header class="site-header">
       <div>
-        <h1>LY- Balloon Register</h1>
+        <h1>Lithuanian Hot Air Balloons</h1>
         <p>Hot air balloons registered in Lithuania</p>
       </div>
       <div class="count" id="count" aria-live="polite"></div>
@@ -36,6 +48,7 @@
     <ul class="grid" id="list"></ul>
     <p class="empty" id="empty" hidden>No balloons match.</p>
   </main>
+  <footer class="site-footer">Footer</footer>
 
   <script>
     const $ = (id) => document.getElementById(id);

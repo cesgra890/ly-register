@@ -53,20 +53,20 @@ body {
 
 a { color: inherit; }
 
-.page { max-width: 1200px; margin: 0 auto; padding: 32px 16px 64px; }
+.page { flex: 1; width: 100%; max-width: 1096px; margin: 0 auto; padding: 40px 16px; }
 
 /* Header and controls keep the system font until they get their own redesign. */
 .site-header, .controls { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 
 /* Header */
 .site-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
-.site-header h1 { margin: 0; font-size: clamp(26px, 4vw, 36px); letter-spacing: -0.02em; line-height: 1.1; }
+.site-header h1 { margin: 0; font-size: clamp(26px, 4vw, 36px); letter-spacing: -0.3509px; line-height: 1.1; }
 .site-header h1 span { color: var(--accent); font-family: var(--mono); font-weight: 600; }
 .site-header p { margin: 4px 0 0; color: var(--muted); }
 .count { font-family: var(--mono); color: var(--muted); font-size: 13px; }
 
 /* Controls */
-.controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto auto auto; gap: 8px; margin-bottom: 20px; position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 8px 0; }
+.controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto auto auto; gap: 6px; margin-bottom: 24px; position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 8px 0; }
 .controls input, .controls select {
   font: inherit; color: var(--ink); background: var(--surface);
   border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; min-width: 0;
@@ -82,7 +82,7 @@ a { color: inherit; }
 }
 
 /* Grid of cards (Figma: LY-Register › Index › Card) */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; list-style: none; padding: 2px; margin: 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; list-style: none; padding: 0; margin: 0; }
 .card {
   display: flex; flex-direction: column; height: 100%; text-decoration: none;
   background: var(--card-bg); border-radius: 15px;
@@ -147,8 +147,8 @@ a { color: inherit; }
 
 .empty, .error { text-align: center; color: var(--muted); padding: 48px 0; }
 
-/* Details page (Figma: LY-Register › Details) */
-.details-page {
+/* Details page (Figma: LY-Register › Details); the Index page shares its nav and colours. */
+.details-page, .index-page {
   --d-bg: #FAF9F9;
   --d-ink: #222222;
   --d-value: #000000;
@@ -159,12 +159,12 @@ a { color: inherit; }
   --d-link: #0000FF;
   --d-nav-bg: #FFFFFF;
   --expired: #A52A2A;
-  --d-gutter: max(16px, calc((100% - 1068px) / 2)); /* 1068px content column */
+  --d-gutter: max(16px, calc((100% - 1064px) / 2)); /* 1064px content column */
   display: flex; flex-direction: column; min-height: 100vh;
   background: var(--d-bg); color: var(--d-ink);
 }
 @media (prefers-color-scheme: dark) {
-  .details-page {
+  .details-page, .index-page {
     --d-bg: #15171b;
     --d-ink: #ecebe6;
     --d-value: #ecebe6;
@@ -177,6 +177,8 @@ a { color: inherit; }
     --expired: #E06B5F;
   }
 }
+
+.index-page { color: var(--ink); }
 
 .site-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 24px; padding: 16px var(--d-gutter); background: var(--d-nav-bg); }
 .site-brand { display: flex; align-items: center; gap: 9px; color: var(--d-ink); font-size: 18px; font-weight: 700; line-height: 18px; letter-spacing: -0.15px; text-decoration: none; white-space: nowrap; }
@@ -192,7 +194,7 @@ a { color: inherit; }
 .crumb-sep { color: var(--d-sep); }
 .crumb-current { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.details-main { flex: 1; width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 16px 60px; }
+.details-main { flex: 1; width: 100%; max-width: 1096px; margin: 0 auto; padding: 0 16px 60px; }
 .detail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
 .detail .img-wrap { aspect-ratio: 880 / 1040; border-radius: 17.231px; background: var(--d-row); }
 .detail-info { display: flex; flex-direction: column; gap: 48px; min-width: 0; }
@@ -240,7 +242,9 @@ a { color: inherit; }
   .info-top { padding: 8px 0; }
 }
 
+.site-footer { min-height: 53px; padding: 16px 24px; border-top: 1px solid var(--d-line); color: #999999; font-size: 12px; line-height: 19.2px; letter-spacing: -0.24px; text-align: center; }
+
 /* List page only: keeps the layout from shifting when filtering changes the page height. */
 html.list-page {
-  scrollbar-gutter: stable both-edges;
+  scrollbar-gutter: stable;
 }
