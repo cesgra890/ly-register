@@ -169,7 +169,7 @@
         [el("abbr", { title: "Maximum Takeoff Weight" }, "MTOW"), withUnit(row.MTOW, "kg")],
       ];
       // Balloons that came to Lithuania new get a green mark after their registration date.
-      const fresh = (row.freshness || "").trim().toLowerCase() === "arrived fresh"
+      const fresh = (col(row, ".freshness", "freshness") || "").trim().toLowerCase() === "arrived fresh"
         ? el("span", { class: "fresh-mark", title: "Arrived fresh", "aria-label": "Arrived fresh" }, "✱") : null;
       const registration = [
         ["CAA registration", row["CAA registration"], fresh],
