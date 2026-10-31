@@ -179,30 +179,32 @@ a { color: inherit; }
 .details-main { flex: 1; width: 100%; max-width: 956px; margin: 0 auto; padding: 16px 16px 64px; }
 .detail { display: grid; grid-template-columns: minmax(0, 440fr) minmax(0, 460fr); gap: 24px; align-items: start; }
 .detail .img-wrap { aspect-ratio: 1184 / 1160; border-radius: 16px; background: var(--d-row); }
-.detail-info { display: flex; flex-direction: column; gap: 48px; min-width: 0; }
-.info-top { display: flex; flex-direction: column; gap: 24px; padding: 8px; }
+.detail-info { display: flex; flex-direction: column; gap: 36px; min-width: 0; }
+.info-top { display: flex; flex-direction: column; gap: 20px; padding: 8px; }
 
 .title-row { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
 .title-row h1 { margin: 0; font-size: 36px; font-weight: 700; line-height: 32px; letter-spacing: -0.36px; }
 .status.status-lg { font-size: 14px; font-weight: 500; line-height: 12px; padding: 6px 8px; border-radius: 8px; }
-.name { display: flex; flex-wrap: wrap; gap: 5px; margin: 12px 0 0; font-size: 16px; line-height: 24px; }
+.name { display: flex; flex-wrap: wrap; gap: 5px; margin: 12px 0 0; font-size: 20px; line-height: 28px; }
 .name strong { font-weight: 500; }
 
 .divider { height: 1px; margin: 0; border: 0; background: var(--d-line); }
 
-.info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; margin: 0; }
+.info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 16px; margin: 0; }
 .info-cell { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .info-label { font-size: 12px; line-height: 15px; color: var(--d-label); }
 .info-label abbr { text-decoration: none; cursor: help; }
-.info-value { display: flex; gap: 5px; margin: 0; color: var(--d-value); font-size: 16px; line-height: normal; overflow-wrap: anywhere; }
+.info-value { display: flex; gap: 5px; margin: 0; color: var(--d-value); font-size: 16px; font-weight: 500; line-height: normal; overflow-wrap: anywhere; }
 .fresh-mark { color: var(--fresh); font-weight: 400; }
 .info-value.expired { color: var(--expired); }
 
-.info-rows { display: flex; flex-direction: column; gap: 8px; margin: 0; }
+.info-rows { display: flex; flex-direction: column; gap: 16px; margin: 0; }
 .info-row { display: flex; flex-direction: column; gap: 4px; padding: 8px; border-radius: 8px; background: var(--d-row); }
 .info-row:has(.tags) { align-self: flex-start; }
 .info-row .info-value { display: block; white-space: pre-line; }
 .info-row a { color: var(--d-link); }
+
+.info-rows .info-value {font-weight: 400; }
 
 .tags { display: flex; flex-wrap: wrap; gap: 5px; white-space: normal; }
 .tag {
