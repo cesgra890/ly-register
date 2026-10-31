@@ -7,9 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,400..700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="styles.css?v=16">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="data.js?v=15"></script>
+  <script src="data.js?v=19"></script>
 </head>
 <body>
   <main class="page">
@@ -72,7 +72,7 @@
             el("div", { class: "branding" }, isBlank(row.branding) ? "—" : row.branding),
             el("div", { class: "card-meta" },
               el("div", { class: "meta" }, model || "Unknown make"),
-              el("div", { class: "card-date" }, isBlank(row["CAA registration"]) ? "—" : row["CAA registration"])))));
+              el("div", { class: "card-date" }, isBlank(row["CAA registration"]) ? "—" : row["CAA registration"], freshMark(row))))));
     }
 
     function render() {
@@ -113,7 +113,7 @@
       all = rows;
       photoIndex = index;
       const uniq = (key) => [...new Set(rows.map((r) => r[key]).filter((v) => !isBlank(v)))].sort();
-      fillSelect($("status"), uniq("CAA status"));
+      fillSelect($("status"), uniq("CAA status").sort(byStatus));
       fillSelect($("maker"), uniq("manufacturer"));
       readUrlState();
       for (const id of controls) $(id).addEventListener("input", render);

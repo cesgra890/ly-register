@@ -7,18 +7,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,400..700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="styles.css?v=16">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="data.js?v=15"></script>
+  <script src="data.js?v=19"></script>
 </head>
 <body class="details-page">
   <header class="site-nav">
     <a class="site-brand" href="index.html">
-      LY-Register
       <span class="site-flag" aria-hidden="true"><span></span><span></span><span></span></span>
+      LY&ndash;Register
     </a>
     <div class="site-links">
-      <span>Manufacturers</span>
+      <span>Balloons</span>
       <span>Clubs</span>
       <span>Links</span>
       <span>About</span>
@@ -168,11 +168,8 @@
         ["Build year", row["build year"]],
         [el("abbr", { title: "Maximum Takeoff Weight" }, "Takeoff Weight"), withUnit(row.MTOW, "kg")],
       ];
-      // Balloons that came to Lithuania new get a green mark after their registration date.
-      const fresh = (col(row, ".freshness", "freshness") || "").trim().toLowerCase() === "arrived fresh"
-        ? el("span", { class: "fresh-mark", title: "Arrived fresh", "aria-label": "Arrived fresh" }, "✱") : null;
       const registration = [
-        ["CAA registration", row["CAA registration"], fresh],
+        ["CAA registration", row["CAA registration"], freshMark(row)],
         ["CAA status", isBlank(status) ? "" : STATUS_STYLES[statusSlug(status)][0]],
         ["CAA last update", row["CAA last update"]],
         ["ARC expiry", row["ARC expiry"], null,

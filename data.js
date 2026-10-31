@@ -91,12 +91,12 @@ function byReg(a, b) {
   return (a["registration mark"] || a.id).localeCompare(b["registration mark"] || b.id);
 }
 
-// CAA status pills, keyed by slug: [title, background, text].
+// CAA status pills, keyed by slug: [title, background, text]. Listed in the status filter's order.
 const STATUS_STYLES = {
-  unregistered: ["Unregistered", "#E6E6E6", "#404040"],
   registered: ["Registered", "#CFF7BE", "#23800B"],
+  unregistered: ["Unregistered", "#E6E6E6", "#404040"],
   "no-reg-history": ["No reg history", "#FFCFC8", "#AE0701"],
-  "to-be-confirmed": ["To be confirmed", "#BEE1F6", "#0053AA"],
+  "tbd.": ["TBD.", "#BEE1F6", "#0053AA"],
   unknown: ["?", "#E6E6E6", "#404040"],
 };
 
@@ -106,9 +106,21 @@ function statusSlug(status) {
   return slug in STATUS_STYLES ? slug : "unknown";
 }
 
+function byStatus(a, b) {
+  const order = Object.keys(STATUS_STYLES);
+  return order.indexOf(statusSlug(a)) - order.indexOf(statusSlug(b));
+}
+
 function statusPill(status) {
   const [title, bg, fg] = STATUS_STYLES[statusSlug(status)];
   return el("span", { class: "status", style: `--status-bg:${bg};--status-fg:${fg}` }, title);
+}
+
+// Balloons that came to Lithuania new get a green mark after their registration date.
+function freshMark(row) {
+  if ((row[".freshness"] || row.freshness || "").trim().toLowerCase() !== "arrived fresh") return null;
+  const text = "The balloon received its first registration in Lithuania fresh off the factory floor";
+  return el("span", { class: "fresh-mark", title: text, "aria-label": text }, "✱");
 }
 
 // Small DOM helper: el("div", { class: "x" }, child, "text", ...)
