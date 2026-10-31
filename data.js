@@ -132,24 +132,29 @@ function balloonImage(row, index, className) {
   const placeholder = () => {
     wrap.replaceChildren(el("div", { class: "img-placeholder", "aria-hidden": "true" }, balloonIcon()));
   };
-  const src = photoSrcs(row, index)[0];
-  if (!src) {
+  const cover = photoSrcs(row, index)[0];
+  if (!cover) {
     placeholder();
   } else {
-    const img = el("img", { src, alt: `${regMark(row)} balloon`, loading: "lazy" });
-    img.addEventListener("error", placeholder);
+    const img = el("img", { src: cardSrc(row.id), alt: `${regMark(row)} balloon`, loading: "lazy" });
+    // No card yet: show the cover, cropped by the browser. No cover either: the placeholder.
+    img.addEventListener("error", () => {
+      if (img.getAttribute("src") === cover) placeholder();
+      else img.src = cover;
+    });
     wrap.append(img);
   }
   return wrap;
 }
 
-// Photos live in images/<id>.jpg, made by prepare_images.py. The .img column
+// Photos live in images/details/<id>.jpg, made by prepare_images.py. The .img column
 // names the original photo for that script; "n/a" means there is no photo.
-const IMAGE_DIR = "images/";
+const DETAILS_DIR = "images/details/";
+const CARDS_DIR = "images/cards/";
 
 function imageSrc(row) {
   if ((row[".img"] || "").trim().toLowerCase() === "n/a") return null;
-  return IMAGE_DIR + encodeURIComponent(`${row.id}.jpg`);
+  return DETAILS_DIR + encodeURIComponent(`${row.id}.jpg`);
 }
 
 // index.json ({ total, id: photo count }) is written by prepare_images.py and lists
@@ -186,8 +191,13 @@ function photoSrcs(row, index) {
   return srcs;
 }
 
+// The list page's cards use their own 10:7 crops, made by prepare_images.py.
+function cardSrc(id) {
+  return CARDS_DIR + encodeURIComponent(`${id}.jpg`);
+}
+
 function photoSrc(id, n) {
-  return IMAGE_DIR + encodeURIComponent(`${id}-${n}.jpg`);
+  return DETAILS_DIR + encodeURIComponent(`${id}-${n}.jpg`);
 }
 
 // Try <id>-n.jpg, <id>-(n+1).jpg, ... and report each one that exists, stopping at the first gap.

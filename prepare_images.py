@@ -9,20 +9,25 @@ then run:
 
 For every row in the register:
   * .img = "n/a"          -> no photo, skipped
-  * .img = "IMG_4521.jpg" -> photos-original/IMG_4521.jpg becomes images/<id>.jpg
+  * .img = "IMG_4521.jpg" -> photos-original/IMG_4521.jpg becomes images/details/<id>.jpg
   * .img = "IMG_4521.jpg, IMG_4530.HEIC, ..."
                           -> several photos for the details page carousel; the first
-                             is the cover (images/<id>.jpg), then images/<id>-2.jpg, -3, ...
+                             is the cover (images/details/<id>.jpg), then <id>-2.jpg, -3, ...
   * .img empty            -> files in photos-original/ named after the id: ly-auz.jpg
                              (cover), ly-auz-2.jpg, ly-auz-3.jpg, ... (any case/extension)
 
+Each cover also gets a 10:7 centre-cropped copy for the list page's cards, in
+images/cards/<id>.jpg. Prefer your own crop? Save it over that file: a card is only
+remade when its cover is newer, or with --force.
+
 Finally index.json (next to index.html) is written with the total number of photos
-in images/ and the number of photos per id, which the
+in images/details/ and the number of photos per id, which the
 details page uses to build its carousel. Extra <id>-N.jpg files left over from an
 earlier run with more photos are removed.
 
-Added photos to images/ by hand? Run with --index-only to just rebuild index.json
-from the files in images/ (no originals needed). The site only shows photos listed there.
+Added photos to images/details/ by hand? Run with --index-only to just make their cards and
+rebuild index.json from the files in images/details/ (no originals needed). The site only
+shows photos listed there.
 
 Images are shrunk so the longest side is at most --size pixels (never enlarged)
 and saved as JPEG. Uses macOS's built-in `sips`, so HEIC photos work too.
@@ -39,6 +44,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PHOTO_EXTS = {".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp", ".tif", ".tiff"}
+CARD_WIDTH, CARD_HEIGHT = 680, 476  # 10:7, sharp on the widest cards (339px on phones) at 2x
 
 
 def image_size(path):
@@ -46,24 +52,71 @@ def image_size(path):
         ["sips", "-g", "pixelWidth", "-g", "pixelHeight", str(path)],
         capture_output=True, text=True, check=True,
     ).stdout
-    values = [int(line.split(":")[1]) for line in out.splitlines() if "pixel" in line]
-    return max(values) if values else 0
+    width, height = [int(line.split(":")[1]) for line in out.splitlines() if "pixel" in line]
+    return width, height
 
 
 def convert(src, dst, size, quality):
     cmd = ["sips", "-s", "format", "jpeg", "-s", "formatOptions", str(quality)]
-    if image_size(src) > size:
+    if max(image_size(src)) > size:
         cmd += ["-Z", str(size)]
     cmd += [str(src), "--out", str(dst)]
     subprocess.run(cmd, capture_output=True, text=True, check=True)
 
 
-def write_index(out, path):
-    """Write index.json at path: "total" photos in out/, then photo count per id from its <id>.jpg / <id>-N.jpg files."""
-    names = {p.stem for p in out.glob("*.jpg")}
+def is_cover(stem, names):
+    """<id>-N is a carousel photo only if <id> exists, as some ids end in a number (ly-oae-1)."""
+    m = re.search(r"-\d+$", stem)
+    return not (m and stem[:m.start()] in names)
+
+
+def make_card(src, dst, quality):
+    """Save a centre crop of src at the card's aspect ratio, shrunk (never enlarged) to card size."""
+    width, height = image_size(src)
+    crop_width = min(width, round(height * CARD_WIDTH / CARD_HEIGHT))
+    crop_height = min(height, round(width * CARD_HEIGHT / CARD_WIDTH))
+    subprocess.run(
+        ["sips", "-s", "format", "jpeg", "-s", "formatOptions", str(quality),
+         "--cropToHeightWidth", str(crop_height), str(crop_width), str(src), "--out", str(dst)],
+        capture_output=True, text=True, check=True,
+    )
+    if crop_width > CARD_WIDTH:
+        subprocess.run(
+            ["sips", "-s", "formatOptions", str(quality),
+             "-z", str(CARD_HEIGHT), str(CARD_WIDTH), str(dst)],
+            capture_output=True, text=True, check=True,
+        )
+
+
+def make_cards(details, cards, quality, force):
+    """Make cards/<id>.jpg for each cover in details/, keep newer ones (they may be hand-made), drop orphans. Returns (made, failed)."""
+    cards.mkdir(exist_ok=True)
+    names = {p.stem for p in details.glob("*.jpg")}
+    covers = {p.stem: p for p in details.glob("*.jpg") if is_cover(p.stem, names)}
+    made, failed = 0, []
+    for stem, cover in sorted(covers.items()):
+        dst = cards / f"{stem}.jpg"
+        if dst.exists() and dst.stat().st_mtime >= cover.stat().st_mtime and not force:
+            continue
+        try:
+            make_card(cover, dst, quality)
+            made += 1
+            print(f"  {cover.name} -> {cards.name}/{dst.name}")
+        except subprocess.CalledProcessError as err:
+            failed.append(f"{stem}: card ({err.stderr.strip() or err})")
+    for stale in cards.glob("*.jpg"):
+        if stale.stem not in covers:
+            stale.unlink()
+            print(f"  removed {cards.name}/{stale.name}")
+    return made, failed
+
+
+def write_index(details, path):
+    """Write index.json at path: "total" photos in details/, then photo count per id from its <id>.jpg / <id>-N.jpg files."""
+    names = {p.stem for p in details.glob("*.jpg")}
     index = {}
     for stem in names:
-        if re.search(r"-\d+$", stem):
+        if not is_cover(stem, names):
             continue  # a carousel photo; counted with its cover below
         count = 1
         while f"{stem}-{count + 1}" in names:
@@ -78,25 +131,31 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--csv", type=Path, default=HERE / "register.csv", help="register CSV (default: register.csv)")
     parser.add_argument("--originals", type=Path, default=HERE / "photos-original", help="folder with downloaded photos")
-    parser.add_argument("--out", type=Path, default=HERE / "images", help="output folder (default: images)")
+    parser.add_argument("--out", type=Path, default=HERE / "images", help="output folder, holding details/ and cards/ (default: images)")
     parser.add_argument("--size", type=int, default=1200, help="longest side in pixels (default: 1200)")
     parser.add_argument("--quality", type=int, default=80, help="JPEG quality 1-100 (default: 80)")
     parser.add_argument("--force", action="store_true", help="redo images that already exist")
     parser.add_argument("--index", type=Path, default=HERE / "index.json", help="photo index file (default: index.json next to the site)")
-    parser.add_argument("--index-only", action="store_true", help="only rebuild index.json from the files in images/")
+    parser.add_argument("--index-only", action="store_true", help="only make cards and rebuild index.json from the files in images/details/")
     args = parser.parse_args()
+    details = args.out / "details"
+    cards = args.out / "cards"
 
     if args.index_only:
-        if not args.out.is_dir():
-            sys.exit(f"No images folder at {args.out}.")
-        index, total = write_index(args.out, args.index)
+        if not details.is_dir():
+            sys.exit(f"No photos folder at {details}.")
+        made, card_failed = make_cards(details, cards, args.quality, args.force)
+        index, total = write_index(details, args.index)
         multi = sum(1 for c in index.values() if c > 1)
-        print(f"{total} photos in {args.out.name}/; {len(index)} balloons have photos ({multi} with more than one); wrote {args.index.name}.")
+        print(f"{total} photos in {details.name}/; {len(index)} balloons have photos ({multi} with more than one); {made} cards made; wrote {args.index.name}.")
+        if card_failed:
+            print("\n".join(f"  {f}" for f in card_failed))
+            sys.exit(1)
         return
 
     if not args.originals.is_dir():
         sys.exit(f"No originals folder at {args.originals}. Put the downloaded photos there first.")
-    args.out.mkdir(exist_ok=True)
+    details.mkdir(parents=True, exist_ok=True)
 
     # Case-insensitive lookup: by full filename and by filename without extension.
     originals = [p for p in args.originals.iterdir() if p.suffix.lower() in PHOTO_EXTS]
@@ -145,7 +204,7 @@ def main():
         used.update(sources)
 
         for n, src in enumerate(sources, start=1):
-            dst = args.out / (f"{balloon_id}.jpg" if n == 1 else f"{balloon_id}-{n}.jpg")
+            dst = details / (f"{balloon_id}.jpg" if n == 1 else f"{balloon_id}-{n}.jpg")
             up_to_date = dst.exists() and dst.stat().st_mtime >= src.stat().st_mtime
             if up_to_date and made_from.get(dst.name) == src.name and not args.force:
                 skipped += 1
@@ -159,21 +218,23 @@ def main():
                 failed.append(f"{balloon_id}: {src.name} ({err.stderr.strip() or err})")
 
         # Drop carousel photos left over from a run that had more of them.
-        for stale in args.out.glob(f"{balloon_id}-*.jpg"):
+        for stale in details.glob(f"{balloon_id}-*.jpg"):
             m = re.fullmatch(rf"{re.escape(balloon_id)}-(\d+)", stale.stem)
             if m and int(m.group(1)) > len(sources):
                 stale.unlink()
                 made_from.pop(stale.name, None)
                 print(f"  removed {stale.name}")
 
-    index, total = write_index(args.out, args.index)
+    cards_made, card_failed = make_cards(details, cards, args.quality, args.force)
+    failed += card_failed
+    index, total = write_index(details, args.index)
     multi = sum(1 for c in index.values() if c > 1)
     made_from_file.write_text(json.dumps(made_from, indent=0, sort_keys=True) + "\n")
 
     unused = sorted(p.name for p in originals if p not in used)
 
     print(f"\nConverted {done}, already up to date {skipped}, marked n/a {no_photo}.")
-    print(f"{total} photos in {args.out.name}/; {len(index)} balloons have photos ({multi} with more than one); wrote {args.index.name}.")
+    print(f"{total} photos in {details.name}/; {len(index)} balloons have photos ({multi} with more than one); {cards_made} cards made; wrote {args.index.name}.")
     if missing:
         print(f"\n{len(missing)} photos not found:")
         print("\n".join(f"  {m}" for m in missing))
