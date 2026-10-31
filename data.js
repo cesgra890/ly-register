@@ -96,7 +96,7 @@ const STATUS_STYLES = {
   unregistered: ["Unregistered", "#E6E6E6", "#404040"],
   registered: ["Registered", "#CFF7BE", "#23800B"],
   "no-reg-history": ["No reg history", "#FFCFC8", "#AE0701"],
-  expected: ["Expected", "#BEE1F6", "#0053AA"],
+  "to-be-confirmed": ["To be confirmed", "#BEE1F6", "#0053AA"],
   unknown: ["?", "#E6E6E6", "#404040"],
 };
 
