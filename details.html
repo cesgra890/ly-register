@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,400..700&display=swap">
   <link rel="stylesheet" href="styles.css?v=13">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="data.js?v=12"></script>
+  <script src="data.js?v=13"></script>
 </head>
 <body class="details-page">
   <header class="site-nav">
@@ -206,7 +206,7 @@
           dir === "prev" ? [el("span", { "aria-hidden": "true" }, "←"), markOf(r)] : [markOf(r), el("span", { "aria-hidden": "true" }, "→")]);
       document.getElementById("pager").replaceChildren(link(prev, "prev"), link(next, "next"));
 
-      // index.json lists every photo; only without it do we look for more <id>-N.jpg files.
+      // index.json lists every photo; only without it do we look for more <id>__N.jpg files.
       const photos = photoSrcs(row, photoIndex);
       const gallery = carousel(photos, `${reg} balloon`);
       if (!photoIndex && photos.length) findMorePhotos(row.id, photos.length + 1, gallery.addPhoto);

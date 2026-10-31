@@ -179,7 +179,7 @@ async function loadPhotoIndex() {
   return index;
 }
 
-// All photos for a balloon: the cover <id>.jpg, then <id>-2.jpg, <id>-3.jpg, ...
+// All photos for a balloon: the cover <id>.jpg, then <id>__2.jpg, <id>__3.jpg, ...
 // With an index, exactly the photos it lists; without one, a guess at the cover.
 function photoSrcs(row, index) {
   const cover = imageSrc(row);
@@ -197,7 +197,7 @@ function cardSrc(id) {
 }
 
 function photoSrc(id, n) {
-  return DETAILS_DIR + encodeURIComponent(`${id}-${n}.jpg`);
+  return DETAILS_DIR + encodeURIComponent(`${id}__${n}.jpg`);
 }
 
 // Try <id>-n.jpg, <id>-(n+1).jpg, ... and report each one that exists, stopping at the first gap.

@@ -12,9 +12,9 @@ For every row in the register:
   * .img = "IMG_4521.jpg" -> photos-original/IMG_4521.jpg becomes images/details/<id>.jpg
   * .img = "IMG_4521.jpg, IMG_4530.HEIC, ..."
                           -> several photos for the details page carousel; the first
-                             is the cover (images/details/<id>.jpg), then <id>-2.jpg, -3, ...
+                             is the cover (images/details/<id>.jpg), then <id>__2.jpg, __3, ...
   * .img empty            -> files in photos-original/ named after the id: ly-auz.jpg
-                             (cover), ly-auz-2.jpg, ly-auz-3.jpg, ... (any case/extension)
+                             (cover), ly-auz__2.jpg, ly-auz__3.jpg, ... (any case/extension)
 
 Each cover also gets a 10:7 centre-cropped copy for the list page's cards, in
 images/cards/<id>.jpg. Prefer your own crop? Save it over that file: a card is only
@@ -22,7 +22,7 @@ remade when its cover is newer, or with --force.
 
 Finally index.json (next to index.html) is written with the total number of photos
 in images/details/ and the number of photos per id, which the
-details page uses to build its carousel. Extra <id>-N.jpg files left over from an
+details page uses to build its carousel. Extra <id>__N.jpg files left over from an
 earlier run with more photos are removed.
 
 Added photos to images/details/ by hand? Run with --index-only to just make their cards and
@@ -64,12 +64,6 @@ def convert(src, dst, size, quality):
     subprocess.run(cmd, capture_output=True, text=True, check=True)
 
 
-def is_cover(stem, names):
-    """<id>-N is a carousel photo only if <id> exists, as some ids end in a number (ly-oae-1)."""
-    m = re.search(r"-\d+$", stem)
-    return not (m and stem[:m.start()] in names)
-
-
 def make_card(src, dst, quality):
     """Save a centre crop of src at the card's aspect ratio, shrunk (never enlarged) to card size."""
     width, height = image_size(src)
@@ -91,8 +85,7 @@ def make_card(src, dst, quality):
 def make_cards(details, cards, quality, force):
     """Make cards/<id>.jpg for each cover in details/, keep newer ones (they may be hand-made), drop orphans. Returns (made, failed)."""
     cards.mkdir(exist_ok=True)
-    names = {p.stem for p in details.glob("*.jpg")}
-    covers = {p.stem: p for p in details.glob("*.jpg") if is_cover(p.stem, names)}
+    covers = {p.stem: p for p in details.glob("*.jpg") if "__" not in p.stem}
     made, failed = 0, []
     for stem, cover in sorted(covers.items()):
         dst = cards / f"{stem}.jpg"
@@ -112,14 +105,14 @@ def make_cards(details, cards, quality, force):
 
 
 def write_index(details, path):
-    """Write index.json at path: "total" photos in details/, then photo count per id from its <id>.jpg / <id>-N.jpg files."""
+    """Write index.json at path: "total" photos in details/, then photo count per id from its <id>.jpg / <id>__N.jpg files."""
     names = {p.stem for p in details.glob("*.jpg")}
     index = {}
     for stem in names:
-        if not is_cover(stem, names):
+        if "__" in stem:
             continue  # a carousel photo; counted with its cover below
         count = 1
-        while f"{stem}-{count + 1}" in names:
+        while f"{stem}__{count + 1}" in names:
             count += 1
         index[stem] = count
     data = {"total": len(names), **dict(sorted(index.items()))}
@@ -166,8 +159,8 @@ def main():
         rows = [r for r in csv.DictReader(f) if (r.get("id") or "").strip()]
 
     def numbered(balloon_id):
-        """Originals named <id>-2, <id>-3, ... in number order."""
-        pattern = re.compile(rf"{re.escape(balloon_id.lower())}-(\d+)")
+        """Originals named <id>__2, <id>__3, ... in number order."""
+        pattern = re.compile(rf"{re.escape(balloon_id.lower())}__(\d+)")
         hits = [(int(m.group(1)), p) for p in originals if (m := pattern.fullmatch(p.stem.lower()))]
         return [p for _, p in sorted(hits, key=lambda h: h[0])]
 
@@ -204,7 +197,7 @@ def main():
         used.update(sources)
 
         for n, src in enumerate(sources, start=1):
-            dst = details / (f"{balloon_id}.jpg" if n == 1 else f"{balloon_id}-{n}.jpg")
+            dst = details / (f"{balloon_id}.jpg" if n == 1 else f"{balloon_id}__{n}.jpg")
             up_to_date = dst.exists() and dst.stat().st_mtime >= src.stat().st_mtime
             if up_to_date and made_from.get(dst.name) == src.name and not args.force:
                 skipped += 1
@@ -218,8 +211,8 @@ def main():
                 failed.append(f"{balloon_id}: {src.name} ({err.stderr.strip() or err})")
 
         # Drop carousel photos left over from a run that had more of them.
-        for stale in details.glob(f"{balloon_id}-*.jpg"):
-            m = re.fullmatch(rf"{re.escape(balloon_id)}-(\d+)", stale.stem)
+        for stale in details.glob(f"{balloon_id}__*.jpg"):
+            m = re.fullmatch(rf"{re.escape(balloon_id)}__(\d+)", stale.stem)
             if m and int(m.group(1)) > len(sources):
                 stale.unlink()
                 made_from.pop(stale.name, None)
