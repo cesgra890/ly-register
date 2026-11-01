@@ -13,6 +13,8 @@
   --sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
   --field-bg: #FFFFFF;
   --field-line: #E5E5E5;
+  --field-hover: #D4D4D4;
+  --field-ring: #A1A1A1;
   --field-ink: #000000;
   --field-muted: #737373;
   --card-bg: #FFFFFF;
@@ -39,6 +41,8 @@
     --shadow: none;
     --field-bg: #1d2026;
     --field-line: #2d3139;
+    --field-hover: #434852;
+    --field-ring: #6b6f78;
     --field-ink: #ecebe6;
     --field-muted: #9a9ea8;
     --card-bg: #1d2026;
@@ -88,7 +92,14 @@ a { color: inherit; }
   background-image: url("images/icons/chevron-down.svg"); background-repeat: no-repeat; background-position: right 8.5px center; background-size: 16px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.search-group:focus-within, .controls select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.search-group, .controls select { transition: border-color 0.15s, box-shadow 0.15s; }
+@media (hover: hover) {
+  .search-group:hover, .controls select:hover { border-color: var(--field-hover); }
+}
+.search-group:focus-within, .controls select:focus {
+  border-color: var(--field-ring); outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--field-ring) 50%, transparent);
+}
 @media (max-width: 900px) {
   .controls { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .search-group { grid-column: 1 / -1; }
