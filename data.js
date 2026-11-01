@@ -81,7 +81,7 @@ function isBlank(value) {
 }
 
 function regMark(row) {
-  return isBlank(row["registration mark"]) ? "No mark" : row["registration mark"];
+  return isBlank(row["registration mark"]) ? "n/a" : row["registration mark"];
 }
 
 // Registration order, with balloons that have no mark at the end.

@@ -83,9 +83,7 @@
           balloonImage(row, photoIndex),
           el("div", { class: "card-body" },
             el("div", { class: "card-top" },
-              isBlank(row["registration mark"])
-                ? el("span", { class: "reg blank", role: "img", "aria-label": regMark(row) }, "—")
-                : el("span", { class: "reg" }, regMark(row)),
+              el("span", { class: "reg" }, isBlank(row["registration mark"]) ? "n/a" : regMark(row)),
               statusPill(status)),
             el("div", { class: "branding" }, isBlank(row.branding) ? "—" : row.branding),
             el("div", { class: "card-meta" },
