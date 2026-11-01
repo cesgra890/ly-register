@@ -12,6 +12,7 @@
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --sans: "Google Sans Flex", system-ui, -apple-system, "Segoe UI", sans-serif;
   --card-bg: #FFFFFF;
+  --card-border: #E1E1E1;
   --card-image: #E0E3F4;
   --card-ink: #1F1F1F;
   --card-meta: #444746;
@@ -33,6 +34,7 @@
     --warn: #e0a84a;
     --shadow: none;
     --card-bg: #1d2026;
+    --card-border: #2d3139;
     --card-image: #2d3139;
     --card-ink: #ecebe6;
     --card-meta: #9a9ea8;
@@ -85,22 +87,21 @@ a { color: inherit; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; list-style: none; padding: 0; margin: 0; }
 .card {
   display: flex; flex-direction: column; height: 100%; text-decoration: none;
-  background: var(--card-bg); border-radius: 15px;
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
   overflow: hidden;
   transition: transform 0.15s ease;
 }
 .card:hover { transform: translateY(-2px); }
 .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.card .img-wrap { aspect-ratio: 10 / 7; background: var(--card-image); }
-.card-body { padding: 16px; display: grid; gap: 12px; }
+.card .img-wrap { aspect-ratio: 10 / 7; margin: 8px; border-radius: 8px; background: var(--card-image); }
+.card-body { padding: 8px 16px 16px; display: grid; gap: 12px; }
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .reg { color: var(--card-ink); font-size: 21px; font-weight: 700; line-height: 20px; white-space: nowrap; }
-.card .status { padding: 4px; border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 12px; letter-spacing: -0.24px; }
-.branding { color: var(--card-ink); font-size: 14px; font-weight: 500; line-height: normal; letter-spacing: 0.1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card-meta { display: grid; gap: 4px; font-size: 12px; line-height: normal; letter-spacing: 0.1px; }
+.card .status { padding: 4px; border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 12px; letter-spacing: 0; }
+.branding { color: var(--card-ink); font-size: 14px; font-weight: 500; line-height: normal; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-meta { display: grid; gap: 4px; font-size: 12px; line-height: normal; letter-spacing: 0; }
 .meta { color: var(--card-meta); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-date { display: flex; gap: 4px; color: var(--card-date); white-space: nowrap; }
-.card-date .fresh-mark { letter-spacing: 0; }
 
 /* Images */
 .img-wrap { background: color-mix(in srgb, var(--line) 50%, var(--surface)); display: grid; place-items: center; overflow: hidden; }
