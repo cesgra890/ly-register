@@ -33,20 +33,20 @@
     </header>
 
     <div class="controls">
-      <select id="status" aria-label="CAA status"><option value="">All statuses</option></select>
-      <select id="maker" aria-label="Manufacturer"><option value="">All manufacturers</option></select>
-      <select id="sort" aria-label="Sort">
-        <option value="caa-desc">Recently registered</option>
-        <option value="reg">Registration mark A–Z</option>
-        <option value="year-desc">Newest built</option>
-        <option value="year-asc">Oldest built</option>
-      </select>
       <div class="search-group">
         <img class="search-icon" src="images/icons/search.svg" alt="" width="16" height="16">
         <input id="q" type="search" placeholder="Search registration, branding, model, owner…" aria-label="Search">
         <span class="count" id="count" aria-live="polite"></span>
         <button class="search-clear" id="clear" type="button" aria-label="Clear search" hidden></button>
       </div>
+      <select id="status" aria-label="CAA status"><option value="">All statuses</option></select>
+      <select id="maker" aria-label="Manufacturer"><option value="">All manufacturers</option></select>
+      <select id="sort" aria-label="Sort">
+        <option value="caa-desc">Recently registered</option>
+        <option value="reg">Registration mark</option>
+        <option value="year-desc">Newest built</option>
+        <option value="year-asc">Oldest built</option>
+      </select>
     </div>
 
     <ul class="grid" id="list"></ul>
