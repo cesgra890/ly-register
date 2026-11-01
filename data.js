@@ -113,7 +113,7 @@ function byStatus(a, b) {
 
 function statusPill(status) {
   const [title, bg, fg] = STATUS_STYLES[statusSlug(status)];
-  return el("span", { class: "status", style: `--status-bg:${bg};--status-fg:${fg}` }, title);
+  return el("span", { class: "status", title, style: `--status-bg:${bg};--status-fg:${fg}` }, title);
 }
 
 // Balloons that came to Lithuania new get a green mark after their registration date.

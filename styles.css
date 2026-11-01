@@ -113,11 +113,11 @@ a { color: inherit; }
 @media (prefers-color-scheme: dark) {
   .card .img-wrap.no-image { filter: brightness(0.3); }
 }
-.card-body { padding: 8px 16px 16px; display: grid; gap: 12px; }
+.card-body { padding: 8px 16px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.reg { color: var(--card-ink); font-size: 21px; font-weight: 700; line-height: 20px; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.reg { color: var(--card-ink); font-size: 21px; font-weight: 700; line-height: 20px; white-space: nowrap; flex: none; }
 .reg.blank { color: var(--card-date); }
-.card .status { flex: none; padding: 4px; border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 12px; letter-spacing: 0; }
+.card .status { min-width: 0; overflow: hidden; text-overflow: ellipsis; padding: 4px; border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 12px; letter-spacing: 0; }
 .branding { color: var(--card-ink); font-size: 14px; font-weight: 500; line-height: normal; letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-meta { display: grid; gap: 4px; font-size: 12px; line-height: normal; letter-spacing: 0; }
 .meta { color: var(--card-meta); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
