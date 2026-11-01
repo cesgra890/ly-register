@@ -59,8 +59,8 @@
     let all = [];
     let photoIndex = null;
 
-    function fillSelect(select, values) {
-      for (const v of values) select.append(el("option", { value: v }, v));
+    function fillSelect(select, values, label = (v) => v) {
+      for (const v of values) select.append(el("option", { value: v }, label(v)));
     }
 
     function readUrlState() {
@@ -131,7 +131,7 @@
       all = rows;
       photoIndex = index;
       const uniq = (key) => [...new Set(rows.map((r) => r[key]).filter((v) => !isBlank(v)))].sort();
-      fillSelect($("status"), uniq("CAA status").sort(byStatus));
+      fillSelect($("status"), uniq("CAA status").sort(byStatus), (v) => STATUS_STYLES[statusSlug(v)][0]);
       fillSelect($("maker"), uniq("manufacturer"));
       readUrlState();
       for (const id of controls) $(id).addEventListener("input", render);
