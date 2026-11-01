@@ -130,10 +130,12 @@ a { color: inherit; }
 .card:hover { transform: translateY(-2px); }
 .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .card .img-wrap { aspect-ratio: 10 / 7; margin: 8px; border-radius: 8px; background: var(--card-image); }
-.card .img-wrap.no-image { background: url("images/icons/no-image.png") top left / 340.2px 356.4px; }
-@media (prefers-color-scheme: dark) {
-  .card .img-wrap.no-image { filter: brightness(0.3); }
+.card .img-wrap.no-image {
+  background: linear-gradient(var(--d-pattern-dim), var(--d-pattern-dim)),
+    url("images/icons/no-image.png") top left / 340.2px 356.4px;
 }
+.card .img-placeholder { width: 58.5px; height: 58.5px; }
+.card .img-placeholder svg { width: 24.75px; height: 33px; }
 .card-body { padding: 8px 16px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .reg { color: var(--card-ink); font-size: 21px; font-weight: 700; line-height: 20px; white-space: nowrap; flex: none; }

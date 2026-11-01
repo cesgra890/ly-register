@@ -142,7 +142,7 @@ function el(tag, attrs = {}, ...children) {
 function balloonImage(row, index, className) {
   const wrap = el("div", { class: `img-wrap ${className || ""}` });
   const placeholder = () => {
-    wrap.replaceChildren();
+    wrap.replaceChildren(el("div", { class: "img-placeholder", "aria-hidden": "true" }, balloonIcon()));
     wrap.classList.add("no-image");
   };
   const cover = photoSrcs(row, index)[0];
