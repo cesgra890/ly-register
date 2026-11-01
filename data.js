@@ -119,7 +119,7 @@ function statusPill(status) {
 // Balloons that came to Lithuania new get a green mark after their registration date.
 function freshMark(row) {
   if ((row[".freshness"] || row.freshness || "").trim().toLowerCase() !== "arrived fresh") return null;
-  const text = "The balloon was registered as brand new in Lithuania";
+  const text = "The balloon was brand new when first registered in Lithuania";
   return el("span", { class: "fresh-mark", title: text, "aria-label": text }, "✱");
 }
 
