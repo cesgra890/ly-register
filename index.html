@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=32">
+  <link rel="stylesheet" href="styles.css?v=33">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="data.js?v=21"></script>
 </head>
@@ -33,12 +33,6 @@
     </header>
 
     <div class="controls">
-      <div class="search-group">
-        <img class="search-icon" src="images/icons/search.svg" alt="" width="16" height="16">
-        <input id="q" type="search" placeholder="Search registration, branding, model, owner…" aria-label="Search">
-        <span class="count" id="count" aria-live="polite"></span>
-        <button class="search-clear" id="clear" type="button" aria-label="Clear search" hidden></button>
-      </div>
       <select id="status" aria-label="CAA status"><option value="">All statuses</option></select>
       <select id="maker" aria-label="Manufacturer"><option value="">All manufacturers</option></select>
       <select id="sort" aria-label="Sort">
@@ -47,6 +41,12 @@
         <option value="year-desc">Newest built</option>
         <option value="year-asc">Oldest built</option>
       </select>
+      <div class="search-group">
+        <img class="search-icon" src="images/icons/search.svg" alt="" width="16" height="16">
+        <input id="q" type="search" placeholder="Search registration, branding, model, owner…" aria-label="Search">
+        <span class="count" id="count" aria-live="polite"></span>
+        <button class="search-clear" id="clear" type="button" aria-label="Clear search" hidden></button>
+      </div>
     </div>
 
     <ul class="grid" id="list"></ul>

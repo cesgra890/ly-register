@@ -77,7 +77,7 @@ a { color: inherit; }
 .site-header p { margin: 4px 0 0; color: var(--muted); }
 
 /* Controls */
-.controls { display: grid; grid-template-columns: minmax(220px, 1fr) 140px 170px 220px; gap: 6px; margin-bottom: 8px; position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 16px 0; }
+.controls { display: grid; grid-template-columns: 140px 170px 210px minmax(220px, 1fr); gap: 6px; margin-bottom: 8px; position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 16px 0; }
 .search-group, .controls select {
   height: 32px; background-color: var(--field-bg); border: 1px solid var(--field-line); border-radius: 10px;
   font-size: 14px; line-height: 20px;
