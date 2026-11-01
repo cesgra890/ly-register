@@ -7,9 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=24">
+  <link rel="stylesheet" href="styles.css?v=26">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="data.js?v=19"></script>
+  <script src="data.js?v=20"></script>
 </head>
 <body class="index-page">
   <header class="site-nav">
@@ -83,7 +83,9 @@
           balloonImage(row, photoIndex),
           el("div", { class: "card-body" },
             el("div", { class: "card-top" },
-              el("span", { class: "reg" }, regMark(row)),
+              isBlank(row["registration mark"])
+                ? el("span", { class: "reg blank", role: "img", "aria-label": regMark(row) }, "—")
+                : el("span", { class: "reg" }, regMark(row)),
               statusPill(status)),
             el("div", { class: "branding" }, isBlank(row.branding) ? "—" : row.branding),
             el("div", { class: "card-meta" },
