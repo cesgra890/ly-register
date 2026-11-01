@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=23">
+  <link rel="stylesheet" href="styles.css?v=24">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="data.js?v=19"></script>
 </head>
@@ -30,11 +30,14 @@
         <h1>Lithuanian Hot Air Balloons</h1>
         <p>Hot air balloons registered in Lithuania</p>
       </div>
-      <div class="count" id="count" aria-live="polite"></div>
     </header>
 
     <div class="controls">
-      <input id="q" type="search" placeholder="Search registration, branding, model, owner…" aria-label="Search">
+      <div class="search-group">
+        <img class="search-icon" src="images/icons/search.svg" alt="" width="16" height="16">
+        <input id="q" type="search" placeholder="Search registration, branding, model, owner…" aria-label="Search">
+        <span class="count" id="count" aria-live="polite"></span>
+      </div>
       <select id="status" aria-label="CAA status"><option value="">All statuses</option></select>
       <select id="maker" aria-label="Manufacturer"><option value="">All manufacturers</option></select>
       <select id="sort" aria-label="Sort">
@@ -118,7 +121,7 @@
 
       $("list").replaceChildren(...rows.map(card));
       $("empty").hidden = rows.length > 0;
-      $("count").textContent = rows.length === all.length ? `${all.length} balloons` : `${rows.length} of ${all.length}`;
+      $("count").textContent = `${rows.length} ${rows.length === 1 ? "result" : "results"}`;
       writeUrlState();
     }
 

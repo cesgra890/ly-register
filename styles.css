@@ -11,6 +11,10 @@
   --shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 4px 16px rgb(0 0 0 / 0.04);
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --field-bg: #FFFFFF;
+  --field-line: #E5E5E5;
+  --field-ink: #000000;
+  --field-muted: #737373;
   --card-bg: #FFFFFF;
   --card-border: #E1E1E1;
   --card-image: #E0E3F4;
@@ -33,6 +37,10 @@
     --off: #8a8f98;
     --warn: #e0a84a;
     --shadow: none;
+    --field-bg: #1d2026;
+    --field-line: #2d3139;
+    --field-ink: #ecebe6;
+    --field-muted: #9a9ea8;
     --card-bg: #1d2026;
     --card-border: #2d3139;
     --card-image: #2d3139;
@@ -63,18 +71,27 @@ a { color: inherit; }
 .site-header h1 { margin: 0; font-size: clamp(26px, 4vw, 36px); letter-spacing: -0.3509px; line-height: 1.1; }
 .site-header h1 span { color: var(--accent); font-family: var(--mono); font-weight: 600; }
 .site-header p { margin: 4px 0 0; color: var(--muted); }
-.count { font-family: var(--mono); color: var(--muted); font-size: 13px; }
 
 /* Controls */
-.controls { display: grid; grid-template-columns: minmax(220px, 1fr) auto auto auto; gap: 6px; margin-bottom: 24px; position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 8px 0; }
-.controls input, .controls select {
-  font: inherit; color: var(--ink); background: var(--surface);
-  border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; min-width: 0;
+.controls { display: grid; grid-template-columns: minmax(220px, 1fr) 140px 170px 210px; gap: 6px; margin-bottom: 24px; position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 8px 0; }
+.search-group, .controls select {
+  height: 32px; background-color: var(--field-bg); border: 1px solid var(--field-line); border-radius: 10px;
+  font-size: 14px; line-height: 20px;
 }
-.controls input:focus, .controls select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.search-group { display: flex; align-items: center; min-width: 0; padding: 0 8px; }
+.search-icon { display: block; flex: none; }
+.search-group input { flex: 1; min-width: 0; height: 100%; padding: 4px 6px; border: 0; background: none; color: var(--field-ink); font: inherit; outline: none; text-overflow: ellipsis; }
+.search-group input::placeholder { color: var(--field-muted); opacity: 1; }
+.count { flex: none; color: var(--field-muted); font-weight: 500; white-space: nowrap; }
+.controls select {
+  appearance: none; width: 100%; min-width: 0; padding: 0 30px 0 10px; color: var(--field-ink); font-family: inherit;
+  background-image: url("images/icons/chevron-down.svg"); background-repeat: no-repeat; background-position: right 8.5px center; background-size: 16px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.search-group:focus-within, .controls select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 @media (max-width: 900px) {
   .controls { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .controls input { grid-column: 1 / -1; }
+  .search-group { grid-column: 1 / -1; }
 }
 @media (max-width: 560px) {
   .controls { grid-template-columns: 1fr 1fr; }
