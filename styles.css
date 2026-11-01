@@ -68,7 +68,7 @@ a { color: inherit; }
 
 /* Header */
 .site-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
-.site-header h1 { margin: 0; font-size: clamp(26px, 4vw, 36px); letter-spacing: -0.3509px; line-height: 1.1; }
+.site-header h1 { margin: 0; font-size: clamp(26px, 4vw, 36px); letter-spacing: -0.36px; line-height: 1.1; }
 .site-header h1 span { color: var(--accent); font-family: var(--mono); font-weight: 600; }
 .site-header p { margin: 4px 0 0; color: var(--muted); }
 
@@ -245,7 +245,7 @@ a { color: inherit; }
 .tags { display: flex; flex-wrap: wrap; gap: 5px; white-space: normal; }
 .tag {
   padding: 4px; border-radius: 4px;
-  font-size: 12px; line-height: 12px; letter-spacing: -0.24px;
+  font-size: 12px; line-height: 12px; 
   background: var(--tag-bg); color: var(--tag-fg);
 }
 
@@ -260,7 +260,7 @@ a { color: inherit; }
   .info-top { padding: 8px 0; }
 }
 
-.site-footer { min-height: 53px; padding: 16px 24px; border-top: 1px solid var(--d-line); color: #999999; font-size: 12px; line-height: 19.2px; letter-spacing: -0.24px; text-align: center; }
+.site-footer { min-height: 53px; padding: 16px 24px; border-top: 1px solid var(--d-line); color: #999999; font-size: 12px; line-height: 19.2px; letter-spacing: 0; text-align: center; }
 
 /* List page only: keeps the layout from shifting when filtering changes the page height. */
 html.list-page {
